@@ -1,0 +1,5 @@
+venv/
+__pycache
+*.pptx
+*.docx
+*.pdf
