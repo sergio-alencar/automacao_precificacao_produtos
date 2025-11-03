@@ -2,10 +2,11 @@
 
 import os
 import logging
-import product_calculator as calc
-import pdf_writer
-import logger_setup
-from typing import List, Tuple, Optional, Dict, Any, Callable
+import old.product_calculator as calc
+from generators import pptx_generator
+import old.logger_setup as logger_setup
+from typing import List, Tuple, Optional, Dict, Any
+
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +86,7 @@ def run_pricing_process(
     state_uf: str,
     all_inputs: Dict[str, Any],
     selected_products: Dict[str, bool],
+    template_pptx_path: str,
 ):
     logger.info(f"--- Processing Scenario: {municipal_name}/{state_uf} ---")
 
@@ -95,7 +97,7 @@ def run_pricing_process(
             continue
 
         if key not in PRODUCT_REGISTRY:
-            logger.warning(f"Produto '{key}' selecionado, mas não existe em PRODUCT_REGISTRY.")
+            logger.warning(f"Product '{key}' selected but not in PRODUCT_REGISTRY.")
             continue
 
         product = PRODUCT_REGISTRY[key]
@@ -132,7 +134,7 @@ def run_pricing_process(
             if result_value is not None:
                 logger.info(f"{product_name} Value: {result_value:,.2f}")
             else:
-                logger.info(f"{product_name} Value: Não Aplicável")
+                logger.info(f"{product_name} Value: Not Applicable")
 
         except calc.InputError as e:
             logger.error(f"INPUT ERROR calculating {product_name}: {e}")
@@ -142,25 +144,37 @@ def run_pricing_process(
             final_results.append((product_name, None))
 
     if not final_results:
-        logger.warning("No products selected or calculated. PDF will not be generated.")
+        logger.warning("No products selected or calculated. PPTX will not be generated.")
         return
 
-    output_filename = f"Apresentacao_MSL_{municipal_name.replace(' ', '_')}_{state_uf}.pdf"
+    output_pptx_filename = f"Apresentacao_MSL_{municipal_name.replace(' ', '_')}_{state_uf}.pptx"
 
     try:
-        pdf_writer.generate_pricing_pdf(
+        pptx_generator.generate_pptx_presentation(
+            template_path=template_pptx_path,
             municipal_name=municipal_name,
             state_uf=state_uf,
             product_results=final_results,
-            output_filename=output_filename,
+            output_filename=output_pptx_filename,
+            export_to_pdf=True,
         )
-        logger.info(f"Process finished. File saved at: {os.path.abspath(output_filename)}")
+        logger.info(f"Process finished. Generated PPTX at: {os.path.abspath(output_pptx_filename)}")
     except Exception as e:
-        logger.error(f"Fatal error generating PDF: {e}", exc_info=True)
+        logger.error(f"Fatal error generating PPTX: {e}", exc_info=True)
 
 
 if __name__ == "__main__":
     logger_setup.setup_logging()
+
+    TEMPLATE_PPTX_PATH = "templates/presentation_template.pptx"
+
+    if not os.path.exists("templates"):
+        os.makedirs("templates")
+        logger.warning(f"Folder 'templates' created. Please put '{os.path.basename(TEMPLATE_PPTX_PATH)}' inside it.")
+    elif not os.path.exists(TEMPLATE_PPTX_PATH):
+        logger.warning(
+            f"Folder 'templates' exists, but template '{os.path.basename(TEMPLATE_PPTX_PATH)}' not found inside it."
+        )
 
     inputs_1 = {
         "municipal_flooded_area_km2": 50.0,
@@ -182,6 +196,7 @@ if __name__ == "__main__":
         state_uf="MG",
         all_inputs=inputs_1,
         selected_products=selection_1,
+        template_pptx_path=TEMPLATE_PPTX_PATH,
     )
 
     inputs_2 = {
@@ -216,4 +231,5 @@ if __name__ == "__main__":
         state_uf="RJ",
         all_inputs=inputs_2,
         selected_products=selection_2,
+        template_pptx_path=TEMPLATE_PPTX_PATH,
     )
