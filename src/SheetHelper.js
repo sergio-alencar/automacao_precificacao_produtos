@@ -1,6 +1,30 @@
 // src/SheetHelper.gs
 
+/**
+ * @OnlyCurrentDoc
+ */
+
 const SheetHelper = {
+  /**
+   * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
+   * @returns {number[]}
+   */
+  getRowsToProcess: function (sheet) {
+    const activeRange = sheet.getActiveRange();
+    if (!activeRange) return [];
+
+    const startRow = activeRange.getRow();
+    const numRows = activeRange.getNumRows();
+    const endRow = startRow + numRows - 1;
+
+    let rowsToProcess = [];
+    for (let i = startRow; i <= endRow; i++) {
+      if (i > 1) rowsToProcess.push(i);
+    }
+
+    return [...new Set(rowsToProcess)];
+  },
+
   /**
    * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
    * @returns {string[]}
@@ -17,69 +41,91 @@ const SheetHelper = {
   getColumnIndex: function (headers, columnName) {
     const index = headers.indexOf(columnName);
     if (index === -1) {
-      throw new Error(`Erro: A coluna "${columnName}" não foi encontrada.`);
+      throw new Error(`Coluna obrigatória não encontrada: ${columnName}.`);
     }
     return index;
   },
 
   /**
-   * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
-   * @returns {number[]}
-   */
-  getRowsToProcess: function (sheet) {
-    const selection = sheet.getActiveRange();
-    if (!selection) return [];
-
-    const startRow = selection.getRow();
-    const numRows = selection.getNumRows();
-
-    const rowIndexes = new Set();
-    for (let i = 0; i < numRows; i++) {
-      const currentRowIndex = startRow + i;
-      if (currentRowIndex > 1) {
-        rowIndexes.add(currentRowIndex);
-      }
-    }
-
-    return Array.from(rowIndexes);
-  },
-
-  /**
-   * @param {Array<any>} rowData
+   * @param {any[]} rowData
    * @param {string[]} headers
-   * @returns {Object}
+   * @return {Object}
    */
   mapRowToInputs: function (rowData, headers) {
     const inputs = {};
+
     headers.forEach((header, index) => {
-      if (header) {
-        const cellValue = rowData[index];
+      const rawValue = rowData[index];
+      let cleanValue;
 
-        if (cellValue === "S") {
-          inputs[header] = true;
-        } else if (cellValue === "N") {
-          inputs[header] = false;
-        } else if (typeof cellValue === "number") {
-          inputs[header] = cellValue;
-        } else if (typeof cellValue === "string") {
-          const cleanedValue = String(cellValue).replace("R$", "").replace(/\./g, "").replace(",", ".").trim();
+      const numericHeaders = [
+        "populacao",
+        "annual_current_revenue",
+        "folha_mensal",
+        "num_servidores",
+        "num_alunos",
+        "icms_anual",
+        "cfem_last_year_revenue",
+        "energy_generated_mwh",
+        "municipal_flooded_area_km2",
+        "tar",
+        "total_reservoir_area_km2",
+      ];
 
-          const numberValue = parseFloat(cleanedValue);
+      const booleanHeaders = ["possui_rpps"];
 
-          if (!isNaN(numberValue) && String(numberValue) === cleanedValue) {
-            inputs[header] = numberValue;
-          } else {
-            inputs[header] = cellValue;
-          }
-        } else {
-          inputs[header] = cellValue;
-        }
+      if (numericHeaders.includes(header)) {
+        cleanValue = this._parseNumber(rawValue);
+      } else if (booleanHeaders.includes(header)) {
+        cleanValue = this._parseBoolean(rawValue);
+      } else {
+        cleanValue = this._parseString(rawValue);
       }
-    });
 
-    if (!inputs.municipio || !inputs.uf) {
-      throw new Error("Município ou UF não preenchidos.");
-    }
+      inputs[header] = cleanValue;
+    });
     return inputs;
+  },
+
+  /**
+   * @param {any} value
+   * @return {number | undefined}
+   */
+  _parseNumber: function (value) {
+    if (value === null || value === undefined || value === "") {
+      return undefined;
+    }
+    if (typeof value === "number") {
+      return value;
+    }
+
+    const cleanString = String(value)
+      .replace("R$", "")
+      .replace(/\./g, "")
+      .replace(",", ".")
+      .trim();
+
+    const number = parseFloat(cleanString);
+    return isNaN(number) ? undefined : number;
+  },
+
+  /**
+   * @param {any} value
+   * @return {string}
+   */
+  _parseString: function (value) {
+    if (value === null || value === undefined) {
+      return "";
+    }
+    return String(value).trim();
+  },
+
+  /**
+   * @param {any} value
+   * @return {boolean}
+   */
+  _parseBoolean: function (value) {
+    const cleanValue = String(value).trim().toUpperCase();
+    return cleanValue === "S" || cleanValue === "SIM";
   },
 };

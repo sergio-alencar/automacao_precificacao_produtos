@@ -13,13 +13,14 @@ const EMAIL_COLUMN_NAME = "Email para Envio";
 function onOpen() {
   SpreadsheetApp.getUi()
     .createMenu("Automação MSL")
-    .addItem("1. Gerar Apresentação(ões)", "processActiveRows")
+    .addItem("1. Gerar Apresentações Selecionadas", "processActiveRows")
     .addToUi();
 }
 
 function processActiveRows() {
   const ui = SpreadsheetApp.getUi();
-  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  const sheet =
+    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
 
   if (!sheet) {
     ui.alert(`Erro: A aba "${SHEET_NAME}" não foi encontrada.`);
@@ -28,7 +29,9 @@ function processActiveRows() {
 
   const rowsToProcess = SheetHelper.getRowsToProcess(sheet);
   if (rowsToProcess.length === 0) {
-    ui.alert("Por favor, selecione uma ou mais células em linhas de dados (abaixo do cabeçalho).");
+    ui.alert(
+      "Por favor, selecione uma ou mais células em linhas de dados (abaixo do cabeçalho)."
+    );
     return;
   }
 
@@ -57,10 +60,10 @@ function processActiveRows() {
       SpreadsheetApp.flush();
 
       const inputs = SheetHelper.mapRowToInputs(rowData, headers);
-      Logger.log(`Processando ${inputs.municipio}/${inputs.uf}...`);
+      Logger.log(`Processing ${inputs.municipio}/${inputs.uf}...`);
 
       const results = ProductCalculator.calculateAllProducts(inputs);
-      Logger.log(`Resultados calculados: ${JSON.stringify(results)}`);
+      Logger.log(`Calculated results: ${JSON.stringify(results)}`);
 
       const pdfFile = SlideGenerator.generatePresentation(
         TEMPLATE_ID,
@@ -69,22 +72,34 @@ function processActiveRows() {
         inputs.uf,
         results
       );
-      Logger.log(`Apresentação criada: ${pdfFile.getName()}`);
+      Logger.log(`Presentation created: ${pdfFile.getName()}`);
 
-      EmailService.sendEmailWithAttachment(email, inputs.municipio, inputs.uf, pdfFile);
-      Logger.log(`Email enviado para ${email}.`);
+      EmailService.sendEmailWithAttachment(
+        email,
+        inputs.municipio,
+        inputs.uf,
+        pdfFile
+      );
+      Logger.log(`Email sent to ${email}.`);
 
       const url = pdfFile.getUrl();
       statusCell
         .setValue("Concluído")
-        .setRichTextValue(SpreadsheetApp.newRichTextValue().setText("Concluído").setLinkUrl(url).build());
+        .setRichTextValue(
+          SpreadsheetApp.newRichTextValue()
+            .setText("Concluído")
+            .setLinkUrl(url)
+            .build()
+        );
       successCount++;
     } catch (e) {
-      Logger.log(`Erro ao processar linha ${currentRow}: ${e.stack}`);
+      Logger.log(`Error processing row ${currentRow}: ${e.stack}`);
       statusCell.setValue(`Erro: ${e.message}`);
       errorCount++;
     }
   }
 
-  ui.alert(`Processamento concluído.\nSucessos: ${successCount}\nErros: ${errorCount}`);
+  ui.alert(
+    `Processamento concluído.\nSucessos: ${successCount}\nErros: ${errorCount}`
+  );
 }
