@@ -6,9 +6,9 @@
 
 const TEMPLATE_ID = "1wWHtPJAXyRPZpG9kVka9qfzrsAogpHHT2_3e3zPpN0o";
 const OUTPUT_FOLDER_ID = "1edKkvPT0XXP-SrRHXw_tRATdnUamXBCR";
-const SHEET_NAME = "Inputs";
+const SHEET_NAME = "Respostas ao formulário 1";
 const STATUS_COLUMN_NAME = "Status";
-const EMAIL_COLUMN_NAME = "Email para Envio";
+const EMAIL_COLUMN_NAME = "Email para envio";
 
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -37,7 +37,6 @@ function processActiveRows() {
 
   const headers = SheetHelper.getHeaders(sheet);
   const lastCol = sheet.getLastColumn();
-
   const statusColIdx = SheetHelper.getColumnIndex(headers, STATUS_COLUMN_NAME);
   const emailColIdx = SheetHelper.getColumnIndex(headers, EMAIL_COLUMN_NAME);
 

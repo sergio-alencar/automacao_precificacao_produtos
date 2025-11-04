@@ -1,7 +1,10 @@
 venv/
 __pycache__/
+apresentacoes_geradas/
+docs/
 *.pptx
 *.docx
 *.pdf
 *.gsheet
 *.gslides
+*.gform

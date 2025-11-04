@@ -59,25 +59,21 @@ const SheetHelper = {
       let cleanValue;
 
       const numericHeaders = [
-        "populacao",
-        "annual_current_revenue",
-        "folha_mensal",
-        "num_servidores",
-        "num_alunos",
-        "icms_anual",
-        "cfem_last_year_revenue",
-        "energy_generated_mwh",
-        "municipal_flooded_area_km2",
-        "tar",
-        "total_reservoir_area_km2",
+        COLS.POPULACAO,
+        COLS.RECEITA_ANUAL,
+        COLS.FOLHA_MENSAL,
+        COLS.NUM_SERVIDORES,
+        COLS.NUM_ALUNOS,
+        COLS.ICMS_ANUAL,
+        COLS.CFEM_RECEITA,
+        COLS.ENERGIA_GERADA,
+        COLS.AREA_INUNDADA,
+        COLS.TAR,
+        COLS.AREA_RESERVATORIO,
       ];
-
-      const booleanHeaders = ["possui_rpps"];
 
       if (numericHeaders.includes(header)) {
         cleanValue = this._parseNumber(rawValue);
-      } else if (booleanHeaders.includes(header)) {
-        cleanValue = this._parseBoolean(rawValue);
       } else {
         cleanValue = this._parseString(rawValue);
       }
@@ -118,14 +114,5 @@ const SheetHelper = {
       return "";
     }
     return String(value).trim();
-  },
-
-  /**
-   * @param {any} value
-   * @return {boolean}
-   */
-  _parseBoolean: function (value) {
-    const cleanValue = String(value).trim().toUpperCase();
-    return cleanValue === "S" || cleanValue === "SIM";
   },
 };

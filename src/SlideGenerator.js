@@ -11,13 +11,9 @@ const SlideGenerator = {
    */
   generatePresentation: function (
     templateId,
-
     folderId,
-
     municipio,
-
     uf,
-
     results
   ) {
     const outputFolder = DriveApp.getFolderById(folderId);
@@ -28,9 +24,9 @@ const SlideGenerator = {
       .replace(/\//g, "-")}`;
     const newFile = templateFile.makeCopy(newFileName, outputFolder);
     const newSlide = SlidesApp.openById(newFile.getId());
-
     const municipioUf = `${municipio}/${uf}`;
     let totalSum = 0;
+
     results.forEach((r) => {
       if (r.value !== null) totalSum += r.value;
     });
@@ -42,16 +38,12 @@ const SlideGenerator = {
 
     const slide2 = newSlide.getSlides()[1];
     SlideBuilder.createTableOnSlide(slide2, municipio, uf, results, totalSum);
-
     newSlide.saveAndClose();
 
     const pdfBlob = newFile.getAs(MimeType.PDF);
     const pdfFile = outputFolder
-
       .createFile(pdfBlob)
-
       .setName(newFileName + ".pdf");
-
     newFile.setTrashed(true);
 
     return pdfFile;

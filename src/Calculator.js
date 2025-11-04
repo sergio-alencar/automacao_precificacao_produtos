@@ -19,7 +19,7 @@ const ProductCalculator = {
 
     if (!inputs.energy_generated_mwh || !inputs.municipal_flooded_area_km2) {
       Logger.log(
-        "CFURH: Skipping. Missing inputs (energy_generated_mwh or municipal_flooded_area_km2)."
+        "CFURH: Skipping. Missing inputs ('Energia gerada (MWh)' or 'Área inundada no município (km²)')."
       );
       return null;
     }
@@ -40,7 +40,9 @@ const ProductCalculator = {
       inputs.cfem_last_year_revenue === undefined ||
       inputs.cfem_last_year_revenue === null
     ) {
-      Logger.log("CFEM: Skipping. Missing input (cfem_last_year_revenue).");
+      Logger.log(
+        "CFEM: Skipping. Missing input ('CFEM arrecadado nos últimos 5 anos (R$)')."
+      );
       return null;
     }
     const floor = 2500000;
@@ -50,7 +52,9 @@ const ProductCalculator = {
 
   irrf: function (inputs) {
     if (!inputs.annual_current_revenue) {
-      Logger.log("IRRF: Skipping. Missing input (annual_current_revenue).");
+      Logger.log(
+        "IRRF: Skipping. Missing input ('Receita corrente anual do município (R$)')."
+      );
       return null;
     }
     const rcl = inputs.annual_current_revenue;
@@ -65,7 +69,7 @@ const ProductCalculator = {
   verbas: function (inputs) {
     if (!inputs.num_servidores || !inputs.folha_mensal) {
       Logger.log(
-        "Verbas: Skipping. Missing inputs (num_servidores ou folha_mensal)."
+        "Verbas: Skipping. Missing inputs ('Número de servidores' ou 'Folha de pagamento mensal (R$)')."
       );
       return null;
     }
@@ -83,7 +87,9 @@ const ProductCalculator = {
 
   rat_fap: function (inputs) {
     if (!inputs.folha_mensal) {
-      Logger.log("RAT/FAP: Skipping. Missing input (folha_mensal).");
+      Logger.log(
+        "RAT/FAP: Skipping. Missing input ('Folha de pagamento mensal (R$)')."
+      );
       return null;
     }
     const calculation = inputs.folha_mensal * 60 * 0.01 * 1.15;
@@ -92,7 +98,7 @@ const ProductCalculator = {
 
   fundeb_vaar: function (inputs) {
     if (!inputs.num_alunos) {
-      Logger.log("VAAR: Skipping. Missing input (num_alunos).");
+      Logger.log("VAAR: Skipping. Missing input ('Número de alunos').");
       return null;
     }
     const calculation = inputs.num_alunos * 32.5 * 1 * 1.15;
@@ -101,7 +107,7 @@ const ProductCalculator = {
 
   fundeb_vaat: function (inputs) {
     if (!inputs.num_alunos) {
-      Logger.log("VAAT: Skipping. Missing input (num_alunos).");
+      Logger.log("VAAT: Skipping. Missing input ('Número de alunos').");
       return null;
     }
     const calculation = inputs.num_alunos * 97.5 * 2 * 1.15;
@@ -110,7 +116,9 @@ const ProductCalculator = {
 
   fpm: function (inputs) {
     if (!inputs.annual_current_revenue) {
-      Logger.log("FPM: Skipping. Missing input (Receita Corrente Anual).");
+      Logger.log(
+        "FPM: Skipping. Missing input ('Receita corrente anual do município (R$)')."
+      );
       return null;
     }
     const calculation = inputs.annual_current_revenue * 0.03 * 5 * 1.15;
@@ -119,7 +127,7 @@ const ProductCalculator = {
 
   vaf: function (inputs) {
     if (!inputs.icms_anual) {
-      Logger.log("VAF: Skipping. Missing input (icms_anual).");
+      Logger.log("VAF: Skipping. Missing input ('ICMS anual').");
       return null;
     }
     const calculation = inputs.icms_anual * 0.04 * 5 * 1.15;
@@ -128,7 +136,7 @@ const ProductCalculator = {
 
   tunep: function (inputs) {
     if (!inputs.populacao) {
-      Logger.log("TUNEP: Skipping. Missing input (populacao).");
+      Logger.log("TUNEP: Skipping. Missing input ('População').");
       return null;
     }
     const calculation = inputs.populacao * 180 * 5 * 1.15;
@@ -141,7 +149,7 @@ const ProductCalculator = {
       return null;
     }
     if (!inputs.populacao) {
-      Logger.log("COMPREV: Skipping. Missing input (populacao).");
+      Logger.log("COMPREV: Skipping. Missing input ('População').");
       return null;
     }
     const calculation = inputs.populacao * 0.055 * 2500 * 1.2;
@@ -155,15 +163,15 @@ const ProductCalculator = {
   calculateAllProducts: function (inputs) {
     const productMap = [
       {
-        name: "CFURH - Compensação Recursos Hídricos",
+        name: "CFURH",
         fn: this.cfurh.bind(this),
       },
       {
-        name: "CFEM - Exploração Recursos Minerais",
+        name: "CFEM",
         fn: this.cfem.bind(this),
       },
       {
-        name: "IRRF - Imposto de Renda Retido na Fonte",
+        name: "IRRF",
         fn: this.irrf.bind(this),
       },
       {
@@ -204,7 +212,6 @@ const ProductCalculator = {
     for (const product of productMap) {
       results.push({ name: product.name, value: product.fn(inputs) });
     }
-
     return results;
   },
 };

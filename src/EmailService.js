@@ -12,7 +12,7 @@ const EmailService = {
     const body = `
     Olá,
     <br><br>
-    Segue em anexo a apresentação de estimativa de precificação para ${municipio} - ${uf}.
+    Segue em anexo a apresentação de estimativa de precificação para ${municipio}/${uf}.
     <br><br>
     Este é um email automático.
     <br><br>

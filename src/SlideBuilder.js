@@ -14,26 +14,21 @@ const SlideBuilder = {
 
     const numRows = validResults.length + 2;
     const numCols = 2;
-
-    const left = 70,
-      top = 150,
-      width = 800;
-    const height = numRows * 25;
+    const left = 650;
+    const top = 250;
+    const width = 700;
+    const height = numRows * 40;
 
     const table = slide.insertTable(numRows, numCols, left, top, width, height);
-
-    table.getRows().forEach((row) => {
-      row.getCells().forEach((cell) => {
-        cell.getBorderTop().setTransparent();
-        cell.getBorderBottom().setTransparent();
-        cell.getBorderLeft().setTransparent();
-        cell.getBorderRight().setTransparent();
+    for (let i = 0; i < numRows; i++) {
+      const row = table.getRow(i);
+      for (let j = 0; j < numCols; j++) {
+        const cell = row.getCell(j);
         cell.getFill().setSolidFill(255, 255, 255);
-      });
-    });
+      }
+    }
 
     const titleText = `Estimativas de Potenciais de Recuperação - ${municipio}/${uf}`;
-
     const newTitleHeight = 40;
     const titleShape = slide.insertShape(
       SlidesApp.ShapeType.TEXT_BOX,
@@ -42,69 +37,65 @@ const SlideBuilder = {
       width,
       newTitleHeight
     );
+
+    titleShape.getFill().setSolidFill(255, 255, 255);
+    titleShape.setContentAlignment(SlidesApp.ContentAlignment.MIDDLE);
+
     const title = titleShape.getText();
     title.setText(titleText);
     title
       .getTextStyle()
-      .setFontSize(14)
+      .setFontSize(24)
       .setBold(true)
       .setForegroundColor(0, 0, 0);
 
     const headerRow = table.getRow(0);
-    const [headerCell0, headerCell1] = headerRow.getCells();
+    const headerCell0 = headerRow.getCell(0);
+    const headerCell1 = headerRow.getCell(1);
 
     headerCell0.getText().setText("Produto");
     headerCell1.getText().setText("Estimativa");
 
     [headerCell0, headerCell1].forEach((cell) => {
       const style = cell.getText().getTextStyle();
-      style.fontSize(12).setBold(true).setForegroundColor(100, 100, 100);
-      cell.getFill().setSolidFill(240, 240, 240);
+      style.setFontSize(18).setBold(true).setForegroundColor(0, 0, 0);
+      cell.getFill().setSolidFill(255, 255, 255);
     });
-    headerCell1
-      .getText()
-      .getParagraphStyle()
-      .setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
 
     validResults.forEach((result, index) => {
       const row = table.getRow(index + 1);
-      const [cell0, cell1] = row.getCells();
+
+      const cell0 = row.getCell(0);
+      const cell1 = row.getCell(1);
 
       cell0.getText().setText(result.name);
-
-      cell1.getText().setText(formatCurrency(result.value));
+      cell1.getText().setText(Utils.formatCurrency(result.value));
 
       [cell0, cell1].forEach((cell) => {
         cell
           .getText()
           .getTextStyle()
-          .setFontSize(10)
+          .setFontSize(18)
           .setBold(false)
           .setForegroundColor(0, 0, 0);
       });
-      cell1
-        .getText()
-        .getParagraphStyle()
-        .setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
     });
 
     const totalRow = table.getRow(numRows - 1);
-    const [totalCell0, totalCell1] = totalRow.getCells();
+
+    const totalCell0 = totalRow.getCell(0);
+    const totalCell1 = totalRow.getCell(1);
 
     totalCell0.getText().setText("TOTAL GERAL");
-    totalCell1.getText().setText(formatCurrency(totalSum));
+    totalCell1.getText().setText(Utils.formatCurrency(totalSum));
 
     [totalCell0, totalCell1].forEach((cell) => {
       cell
         .getText()
         .getTextStyle()
-        .setFontSize(12)
+        .setFontSize(18)
         .setBold(true)
         .setForegroundColor(0, 0, 0);
     });
-    totalCell1
-      .getText()
-      .getParagraphStyle()
-      .setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
   },
 };
