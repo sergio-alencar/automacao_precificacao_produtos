@@ -7,12 +7,12 @@ const EmailService = {
    * @param {string} uf
    * @param {GoogleAppsScript.Drive.File} pdfFile
    */
-  sendEmailWithAttachment: function (recipientEmail, municipio, uf, pdfFile) {
+  sendEmailWithAttachment(recipientEmail, municipio, uf, pdfFile) {
     const subject = `MSL - Apresentação de Precificação - ${municipio}/${uf}`;
     const body = `
     Olá,
     <br><br>
-    Segue em anexo a apresentação de estimativa de precificação para ${municipio}/${uf}.
+    Envio em anexo a apresentação de estimativa de precificação para ${municipio}/${uf}.
     <br><br>
     Este é um email automático.
     <br><br>

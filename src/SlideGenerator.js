@@ -9,13 +9,7 @@ const SlideGenerator = {
    * @param {Array<Object>} results
    * @returns {GoogleAppsScript.Drive.File}
    */
-  generatePresentation: function (
-    templateId,
-    folderId,
-    municipio,
-    uf,
-    results
-  ) {
+  generatePresentation(templateId, folderId, municipio, uf, results) {
     const outputFolder = DriveApp.getFolderById(folderId);
     const templateFile = DriveApp.getFileById(templateId);
 
@@ -28,7 +22,9 @@ const SlideGenerator = {
     let totalSum = 0;
 
     results.forEach((r) => {
-      if (r.value !== null) totalSum += r.value;
+      if (r.value !== null) {
+        totalSum += r.value;
+      }
     });
 
     const totalSummaryText = `R$ ${Utils.formatTotalSummary(totalSum)}`;

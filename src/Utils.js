@@ -5,7 +5,7 @@ const Utils = {
    * @param {number} value
    * @return {string}
    */
-  formatCurrency: function (value) {
+  formatCurrency(value) {
     if (typeof value !== "number") {
       return this.formatValue(value);
     }
@@ -20,7 +20,7 @@ const Utils = {
    * @param {number} value
    * @return {string}
    */
-  formatTotalSummary: function (value) {
+  formatTotalSummary(value) {
     if (value < 1000000) {
       return `${Math.round(value / 1000)} MIL`;
     } else {
@@ -32,10 +32,11 @@ const Utils = {
    * @param {number | null | undefined} value
    * @return {string}
    */
-  formatValue: function (value) {
+  formatValue(value) {
     if (value === null || value === undefined) {
       return "Não Aplicável";
     }
+
     return this.formatCurrency(value);
   },
 };

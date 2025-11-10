@@ -3,61 +3,77 @@
 const ProductCalculator = {
   GLOBAL_FLOOR: 500000,
 
-  applyGlobalFloor: function (value) {
+  applyGlobalFloor(value) {
     if (value === null || value === undefined) {
       return null;
     }
+
     return Math.max(value, this.GLOBAL_FLOOR);
   },
 
-  cfurh: function (inputs) {
+  /**
+   * @param {string} str
+   * @returns {string}
+   */
+  _normalizeString(str) {
+    if (!str) return "";
+    return str
+      .toString()
+      .trim()
+      .toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9]/g, "");
+  },
+
+  cfurh(inputs) {
     const defaultTar = 79.62;
     const defaultTotalArea = 250;
     const margin = 1.2;
-    const tar = inputs.tar || defaultTar;
-    const totalArea = inputs.total_reservoir_area_km2 || defaultTotalArea;
+    const tar = inputs[COLS.TAR] || defaultTar;
+    const totalArea = inputs[COLS.AREA_RESERVATORIO] || defaultTotalArea;
 
-    if (!inputs.energy_generated_mwh || !inputs.municipal_flooded_area_km2) {
+    if (!inputs[COLS.ENERGIA_GERADA] || !inputs[COLS.AREA_INUNDADA]) {
       Logger.log(
-        "CFURH: Skipping. Missing inputs ('Energia gerada (MWh)' or 'Área inundada no município (km²)')."
+        `CFURH: Skipping. Missing inputs ("${COLS.ENERGIA_GERADA} or ${COLS.AREA_INUNDADA}").`
       );
       return null;
     }
+
     const calculation =
-      inputs.energy_generated_mwh *
+      inputs[COLS.ENERGIA_GERADA] *
       tar *
-      (inputs.municipal_flooded_area_km2 / totalArea) *
+      (inputs[COLS.AREA_INUNDADA] / totalArea) *
       margin;
     return this.applyGlobalFloor(calculation);
   },
 
-  cfem: function (inputs) {
-    if (inputs.uf !== "MG" && inputs.uf !== "PA") {
-      Logger.log(`CFEM: Skipping. State "${inputs.uf}" is not MG or PA.`);
+  cfem(inputs) {
+    if (inputs[COLS.UF] !== "MG" && inputs[COLS.UF] !== "PA") {
+      Logger.log(`CFEM: Skipping. State "${inputs[COLS.UF]}" is not MG or PA.`);
       return null;
     }
+
     if (
-      inputs.cfem_last_year_revenue === undefined ||
-      inputs.cfem_last_year_revenue === null
+      inputs[COLS.CFEM_RECEITA] === undefined ||
+      inputs[COLS.CFEM_RECEITA] === null
     ) {
-      Logger.log(
-        "CFEM: Skipping. Missing input ('CFEM arrecadado nos últimos 5 anos (R$)')."
-      );
+      Logger.log(`CFEM: Skipping. Missing input ("${COLS.CFEM_RECEITA}").`);
       return null;
     }
+
     const floor = 2500000;
-    const calculation = inputs.cfem_last_year_revenue * 5 * 0.15;
+    const calculation = inputs[COLS.CFEM_RECEITA] * 5 * 0.15;
     return Math.max(calculation, floor);
   },
 
-  irrf: function (inputs) {
-    if (!inputs.annual_current_revenue) {
-      Logger.log(
-        "IRRF: Skipping. Missing input ('Receita corrente anual do município (R$)')."
-      );
+  irrf(inputs) {
+    if (!inputs[COLS.RECEITA_ANUAL]) {
+      Logger.log(`IRRF: Skipping. Missing input ("${COLS.RECEITA_ANUAL}").`);
       return null;
     }
-    const rcl = inputs.annual_current_revenue;
+
+    const rcl = inputs[COLS.RECEITA_ANUAL];
     const p1 = rcl * 0.25 * 0.1 * 0.0024;
     const p2 = rcl * 0.25 * 0.2 * 0.01;
     const p3 = rcl * 0.25 * 0.3 * 0.02;
@@ -66,93 +82,170 @@ const ProductCalculator = {
     return this.applyGlobalFloor(calculation);
   },
 
-  verbas: function (inputs) {
-    if (!inputs.num_servidores || !inputs.folha_mensal) {
+  verbas(inputs) {
+    if (!inputs[COLS.NUM_SERVIDORES] || !inputs[COLS.FOLHA_MENSAL]) {
       Logger.log(
-        "Verbas: Skipping. Missing inputs ('Número de servidores' ou 'Folha de pagamento mensal (R$)')."
+        `Verbas: Skipping. Missing inputs ("${COLS.NUM_SERVIDORES}" or "${COLS.FOLHA_MENSAL}").`
       );
       return null;
     }
-    const folhaAcrescida = inputs.folha_mensal * 1.2;
-    let percentual;
-    if (inputs.num_servidores <= 300) percentual = 1.0;
-    else if (inputs.num_servidores <= 600) percentual = 0.9;
-    else if (inputs.num_servidores <= 1000) percentual = 0.8;
-    else if (inputs.num_servidores <= 2000) percentual = 0.7;
-    else percentual = 0.6;
 
+    const folhaAcrescida = inputs[COLS.FOLHA_MENSAL] * 1.2;
+    let percentual;
+    if (inputs[COLS.NUM_SERVIDORES] <= 300) {
+      percentual = 1.0;
+    } else if (inputs[COLS.NUM_SERVIDORES] <= 600) {
+      percentual = 0.9;
+    } else if (inputs[COLS.NUM_SERVIDORES] <= 1000) {
+      percentual = 0.8;
+    } else if (inputs[COLS.NUM_SERVIDORES] <= 2000) {
+      percentual = 0.7;
+    } else {
+      percentual = 0.6;
+    }
     // não tem piso de R$ 500k no doc
     return folhaAcrescida * percentual;
   },
 
-  rat_fap: function (inputs) {
-    if (!inputs.folha_mensal) {
+  rat_fap(inputs) {
+    if (!inputs[COLS.FOLHA_MENSAL]) {
+      Logger.log(`RAT/FAP: Skipping. Missing input ("${COLS.FOLHA_MENSAL}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.FOLHA_MENSAL] * 60 * 0.01 * 1.15;
+    return this.applyGlobalFloor(calculation);
+  },
+
+  fundeb_vaar(inputs) {
+    if (!inputs[COLS.NUM_ALUNOS]) {
+      Logger.log(`VAAR: Skipping. Missing input ("${COLS.NUM_ALUNOS}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.NUM_ALUNOS] * 32.5 * 1 * 1.15;
+    return this.applyGlobalFloor(calculation);
+  },
+
+  fundeb_vaat(inputs) {
+    if (!inputs[COLS.NUM_ALUNOS]) {
+      Logger.log(`VAAT: Skipping. Missing input ("${COLS.NUM_ALUNOS}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.NUM_ALUNOS] * 97.5 * 2 * 1.15;
+    return this.applyGlobalFloor(calculation);
+  },
+
+  fpm(inputs) {
+    if (!inputs[COLS.RECEITA_ANUAL]) {
+      Logger.log(`FPM: Skipping. Missing input ("${COLS.RECEITA_ANUAL}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.RECEITA_ANUAL] * 0.03 * 5 * 1.15;
+    return this.applyGlobalFloor(calculation);
+  },
+
+  vaf(inputs) {
+    if (!inputs[COLS.ICMS_ANUAL]) {
+      Logger.log(`VAF: Skipping. Missing input ("${COLS.ICMS_ANUAL}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.ICMS_ANUAL] * 0.04 * 5 * 1.15;
+    return this.applyGlobalFloor(calculation);
+  },
+
+  tunep(inputs) {
+    if (!inputs[COLS.POPULACAO]) {
+      Logger.log(`TUNEP: Skipping. Missing input ("${COLS.POPULACAO}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.POPULACAO] * 180 * 5 * 1.15;
+    return this.applyGlobalFloor(calculation);
+  },
+
+  comprev(inputs) {
+    if (inputs[COLS.REGIME_PREVIDENCIARIO] !== "RPPS") {
       Logger.log(
-        "RAT/FAP: Skipping. Missing input ('Folha de pagamento mensal (R$)')."
+        `COMPREV: Skipping. Municipality regime is not RPPS (found: "${COLS.REGIME_PREVIDENCIARIO}").`
       );
       return null;
     }
-    const calculation = inputs.folha_mensal * 60 * 0.01 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
 
-  fundeb_vaar: function (inputs) {
-    if (!inputs.num_alunos) {
-      Logger.log("VAAR: Skipping. Missing input ('Número de alunos').");
+    if (!inputs[COLS.POPULACAO]) {
+      Logger.log(`COMPREV: Skipping. Missing input ("${COLS.POPULACAO}").`);
       return null;
     }
-    const calculation = inputs.num_alunos * 32.5 * 1 * 1.15;
+
+    const calculation = inputs[COLS.POPULACAO] * 0.055 * 2500 * 1.2;
     return this.applyGlobalFloor(calculation);
   },
 
-  fundeb_vaat: function (inputs) {
-    if (!inputs.num_alunos) {
-      Logger.log("VAAT: Skipping. Missing input ('Número de alunos').");
+  issqn(inputs) {
+    let estbanData;
+    try {
+      estbanData = getEstbanData();
+    } catch (e) {
+      Logger.log(`ISSQN: Failed to fetch ESTBAN data. Error: ${e.message}`);
       return null;
     }
-    const calculation = inputs.num_alunos * 97.5 * 2 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
 
-  fpm: function (inputs) {
-    if (!inputs.annual_current_revenue) {
+    const headers = estbanData[0];
+    const ufIndex = headers.indexOf["UF"];
+    const munIndex = headers.indexOf("MUNICIPIO");
+    const verbeteIndex = headers.indexOf("VERBETE_711_CONTAS_CREDORAS");
+
+    if (ufIndex === -1 || munIndex === -1 || verbeteIndex === -1) {
       Logger.log(
-        "FPM: Skipping. Missing input ('Receita corrente anual do município (R$)')."
+        "ISSQN: Skipping: Columns (UF, MUNICIPIO, VERBETE_711_CONTAS_CREDORAS) not found on sheet ESTBAN."
       );
       return null;
     }
-    const calculation = inputs.annual_current_revenue * 0.03 * 5 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
 
-  vaf: function (inputs) {
-    if (!inputs.icms_anual) {
-      Logger.log("VAF: Skipping. Missing input ('ICMS anual').");
-      return null;
-    }
-    const calculation = inputs.icms_anual * 0.04 * 5 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
+    const inputUFNorm = this._normalizeString(inputs[COLS.UF]);
+    const inputMunNorm = this._normalizeString(inputs[COLS.MUNICIPIO]);
 
-  tunep: function (inputs) {
-    if (!inputs.populacao) {
-      Logger.log("TUNEP: Skipping. Missing input ('População').");
+    if (!inputUFNorm || !inputMunNorm) {
+      Logger.log("ISSQN: Skipping. 'Município' or 'UF' not filled in on form.");
       return null;
     }
-    const calculation = inputs.populacao * 180 * 5 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
 
-  comprev: function (inputs) {
-    if (!inputs.possui_rpps || inputs.possui_rpps !== true) {
-      Logger.log("COMPREV: Skipping. Municipality does not have RPPS.");
+    let sum = 0;
+
+    for (let i = 1; i < estbanData.length; i++) {
+      const row = estbanData[i];
+
+      if (i < 20) {
+        Logger.log(
+          `[DEBUG G-SHEET] Linha ${i}: UF Bruto: "${row[ufIndex]}" | MUN Bruto: "${row[munIndex]}"`
+        );
+      }
+
+      const rowUfNorm = this._normalizeString(row[ufIndex]);
+      const rowMunNorm = this._normalizeString(row[munIndex]);
+
+      if (rowMunNorm === inputMunNorm && rowUfNorm === inputUFNorm) {
+        const verbeteRaw = row[verbeteIndex];
+        const verbeteValue = parseFloat(verbeteRaw);
+
+        if (!isNaN(verbeteValue)) {
+          sum += verbeteValue;
+        }
+      }
+    }
+
+    if (sum === 0) {
+      Logger.log(
+        `ISSQN: No value found for ${inputMunNorm}/${inputUFNorm} on ESTBAN sheet.`
+      );
       return null;
     }
-    if (!inputs.populacao) {
-      Logger.log("COMPREV: Skipping. Missing input ('População').");
-      return null;
-    }
-    const calculation = inputs.populacao * 0.055 * 2500 * 1.2;
+
+    const calculation = ((sum * 0.2 * 12 * 0.25 * 0.5) / 12) * 60;
+
     return this.applyGlobalFloor(calculation);
   },
 
@@ -160,52 +253,20 @@ const ProductCalculator = {
    * @param {Object} inputs
    * @returns {Array<Object>}
    */
-  calculateAllProducts: function (inputs) {
+  calculateAllProducts(inputs) {
     const productMap = [
-      {
-        name: "CFURH",
-        fn: this.cfurh.bind(this),
-      },
-      {
-        name: "CFEM",
-        fn: this.cfem.bind(this),
-      },
-      {
-        name: "IRRF",
-        fn: this.irrf.bind(this),
-      },
-      {
-        name: "Verbas Indenizatórias",
-        fn: this.verbas.bind(this),
-      },
-      {
-        name: "RAT/FAP",
-        fn: this.rat_fap.bind(this),
-      },
-      {
-        name: "FUNDEB VAAR",
-        fn: this.fundeb_vaar.bind(this),
-      },
-      {
-        name: "FUNDEB VAAT",
-        fn: this.fundeb_vaat.bind(this),
-      },
-      {
-        name: "FPM",
-        fn: this.fpm.bind(this),
-      },
-      {
-        name: "VAF",
-        fn: this.vaf.bind(this),
-      },
-      {
-        name: "TUNEP",
-        fn: this.tunep.bind(this),
-      },
-      {
-        name: "COMPREV",
-        fn: this.comprev.bind(this),
-      },
+      { name: "CFURH", fn: this.cfurh.bind(this) },
+      { name: "CFEM", fn: this.cfem.bind(this) },
+      { name: "IRRF", fn: this.irrf.bind(this) },
+      { name: "Verbas Indenizatórias", fn: this.verbas.bind(this) },
+      { name: "RAT/FAP", fn: this.rat_fap.bind(this) },
+      { name: "FUNDEB VAAR", fn: this.fundeb_vaar.bind(this) },
+      { name: "FUNDEB VAAT", fn: this.fundeb_vaat.bind(this) },
+      { name: "FPM", fn: this.fpm.bind(this) },
+      { name: "VAF", fn: this.vaf.bind(this) },
+      { name: "TUNEP", fn: this.tunep.bind(this) },
+      { name: "COMPREV", fn: this.comprev.bind(this) },
+      { name: "ISSQN", fn: this.issqn.bind(this) },
     ];
 
     const results = [];

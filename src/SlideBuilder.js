@@ -2,14 +2,13 @@
 
 const SlideBuilder = {
   /**
-   *
    * @param {GoogleAppsScript.Slides.Slide} slide
    * @param {string} municipio
    * @param {string} uf
    * @param {Array<Object>} results
    * @param {number} totalSum
    */
-  createTableOnSlide: function (slide, municipio, uf, results, totalSum) {
+  createTableOnSlide(slide, municipio, uf, results, totalSum) {
     const validResults = results.filter((r) => r.value !== null);
 
     const numRows = validResults.length + 2;

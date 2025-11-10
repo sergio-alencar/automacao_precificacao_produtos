@@ -9,8 +9,9 @@ const SheetHelper = {
    * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
    * @returns {number[]}
    */
-  getRowsToProcess: function (sheet) {
+  getRowsToProcess(sheet) {
     const activeRange = sheet.getActiveRange();
+
     if (!activeRange) return [];
 
     const startRow = activeRange.getRow();
@@ -29,7 +30,7 @@ const SheetHelper = {
    * @param {GoogleAppsScript.Spreadsheet.Sheet} sheet
    * @returns {string[]}
    */
-  getHeaders: function (sheet) {
+  getHeaders(sheet) {
     return sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
   },
 
@@ -38,11 +39,13 @@ const SheetHelper = {
    * @param {string} columnName
    * @returns {number}
    */
-  getColumnIndex: function (headers, columnName) {
+  getColumnIndex(headers, columnName) {
     const index = headers.indexOf(columnName);
+
     if (index === -1) {
       throw new Error(`Coluna obrigatória não encontrada: ${columnName}.`);
     }
+
     return index;
   },
 
@@ -51,7 +54,7 @@ const SheetHelper = {
    * @param {string[]} headers
    * @return {Object}
    */
-  mapRowToInputs: function (rowData, headers) {
+  mapRowToInputs(rowData, headers) {
     const inputs = {};
 
     headers.forEach((header, index) => {
@@ -87,10 +90,11 @@ const SheetHelper = {
    * @param {any} value
    * @return {number | undefined}
    */
-  _parseNumber: function (value) {
+  _parseNumber(value) {
     if (value === null || value === undefined || value === "") {
       return undefined;
     }
+
     if (typeof value === "number") {
       return value;
     }
@@ -109,10 +113,9 @@ const SheetHelper = {
    * @param {any} value
    * @return {string}
    */
-  _parseString: function (value) {
-    if (value === null || value === undefined) {
-      return "";
-    }
+  _parseString(value) {
+    if (value === null || value === undefined) return "";
+
     return String(value).trim();
   },
 };
