@@ -22,7 +22,7 @@ const SlideGenerator = {
     let totalSum = 0;
 
     results.forEach((r) => {
-      if (r.value !== null) {
+      if (typeof r.value === "number") {
         totalSum += r.value;
       }
     });

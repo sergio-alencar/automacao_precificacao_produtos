@@ -51,7 +51,7 @@ const ProductCalculator = {
   cfem(inputs) {
     if (inputs[COLS.UF] !== "MG" && inputs[COLS.UF] !== "PA") {
       Logger.log(`CFEM: Skipping. State "${inputs[COLS.UF]}" is not MG or PA.`);
-      return null;
+      return "NA_UF";
     }
 
     if (
@@ -194,13 +194,13 @@ const ProductCalculator = {
     }
 
     const headers = estbanData[0];
-    const ufIndex = headers.indexOf["UF"];
+    const ufIndex = headers.indexOf("UF");
     const munIndex = headers.indexOf("MUNICIPIO");
-    const verbeteIndex = headers.indexOf("VERBETE_711_CONTAS_CREDORAS");
+    const verbeteIndex = headers.indexOf("VERBETE_711_CREDORAS");
 
     if (ufIndex === -1 || munIndex === -1 || verbeteIndex === -1) {
       Logger.log(
-        "ISSQN: Skipping: Columns (UF, MUNICIPIO, VERBETE_711_CONTAS_CREDORAS) not found on sheet ESTBAN."
+        "ISSQN: Skipping. Columns (UF, MUNICIPIO, VERBETE_711_CREDORAS) not found."
       );
       return null;
     }
@@ -209,7 +209,9 @@ const ProductCalculator = {
     const inputMunNorm = this._normalizeString(inputs[COLS.MUNICIPIO]);
 
     if (!inputUFNorm || !inputMunNorm) {
-      Logger.log("ISSQN: Skipping. 'Município' or 'UF' not filled in on form.");
+      Logger.log(
+        "ISSQN: Skipping. Municipality or UF not found in form input."
+      );
       return null;
     }
 
@@ -217,20 +219,11 @@ const ProductCalculator = {
 
     for (let i = 1; i < estbanData.length; i++) {
       const row = estbanData[i];
-
-      if (i < 20) {
-        Logger.log(
-          `[DEBUG G-SHEET] Linha ${i}: UF Bruto: "${row[ufIndex]}" | MUN Bruto: "${row[munIndex]}"`
-        );
-      }
-
       const rowUfNorm = this._normalizeString(row[ufIndex]);
       const rowMunNorm = this._normalizeString(row[munIndex]);
 
-      if (rowMunNorm === inputMunNorm && rowUfNorm === inputUFNorm) {
-        const verbeteRaw = row[verbeteIndex];
-        const verbeteValue = parseFloat(verbeteRaw);
-
+      if (rowMunNorm.startsWith(inputMunNorm) && rowUfNorm === inputUFNorm) {
+        const verbeteValue = parseFloat(row[verbeteIndex]);
         if (!isNaN(verbeteValue)) {
           sum += verbeteValue;
         }
@@ -239,7 +232,7 @@ const ProductCalculator = {
 
     if (sum === 0) {
       Logger.log(
-        `ISSQN: No value found for ${inputMunNorm}/${inputUFNorm} on ESTBAN sheet.`
+        `ISSQN: No value found for ${inputMunNorm};${inputUFNorm} on ESTBAN sheet.`
       );
       return null;
     }

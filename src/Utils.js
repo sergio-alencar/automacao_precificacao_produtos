@@ -23,8 +23,12 @@ const Utils = {
   formatTotalSummary(value) {
     if (value < 1000000) {
       return `${Math.round(value / 1000)} MIL`;
+    } else if (value < 1000000000) {
+      const finalValue = Math.round(value / 1000000);
+      return finalValue > 1 ? `${finalValue} MILHÕES` : `${finalValue} MILHÃO`;
     } else {
-      return `${Math.round(value / 1000000)} MILHÕES`;
+      const finalValue = Math.round(value / 1000000000);
+      return finalValue > 1 ? `${finalValue} BILHÕES` : `${finalValue} BILHÃO`;
     }
   },
 
@@ -33,6 +37,10 @@ const Utils = {
    * @return {string}
    */
   formatValue(value) {
+    if (value === "NA_UF") {
+      return "Não aplicável para esta UF";
+    }
+
     if (value === null || value === undefined) {
       return "Não Aplicável";
     }

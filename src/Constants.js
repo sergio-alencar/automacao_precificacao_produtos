@@ -12,9 +12,9 @@ const COLS = {
   ICMS_ANUAL: "ICMS anual",
   CFEM_RECEITA: "CFEM arrecadado nos últimos 5 anos (R$)",
   REGIME_PREVIDENCIARIO: "Regime previdenciário predominante",
-  ENERGIA_GERADA: "Energia gerada (MWh)",
+  ENERGIA_GERADA: "Energia gerada (MWh/mês)",
   AREA_INUNDADA: "Área inundada no município (km²)",
   AREA_RESERVATORIO: "Área total do reservatório (km²)",
-  TAR: "TAR - Tarifa de referência",
+  TAR: "TAR - Tarifa de referência (R$)",
   STATUS: "Status",
 };

@@ -9,14 +9,12 @@ const SlideBuilder = {
    * @param {number} totalSum
    */
   createTableOnSlide(slide, municipio, uf, results, totalSum) {
-    const validResults = results.filter((r) => r.value !== null);
-
-    const numRows = validResults.length + 2;
+    const numRows = results.length + 2;
     const numCols = 2;
     const left = 650;
     const top = 250;
     const width = 700;
-    const height = numRows * 40;
+    const height = numRows * 35;
 
     const table = slide.insertTable(numRows, numCols, left, top, width, height);
     for (let i = 0; i < numRows; i++) {
@@ -57,11 +55,15 @@ const SlideBuilder = {
 
     [headerCell0, headerCell1].forEach((cell) => {
       const style = cell.getText().getTextStyle();
-      style.setFontSize(18).setBold(true).setForegroundColor(0, 0, 0);
+      style.setFontSize(16).setBold(true).setForegroundColor(0, 0, 0);
       cell.getFill().setSolidFill(255, 255, 255);
+      headerCell1
+        .getText()
+        .getParagraphStyle()
+        .setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
     });
 
-    validResults.forEach((result, index) => {
+    results.forEach((result, index) => {
       const row = table.getRow(index + 1);
 
       const cell0 = row.getCell(0);
@@ -74,9 +76,13 @@ const SlideBuilder = {
         cell
           .getText()
           .getTextStyle()
-          .setFontSize(18)
+          .setFontSize(16)
           .setBold(false)
           .setForegroundColor(0, 0, 0);
+        cell1
+          .getText()
+          .getParagraphStyle()
+          .setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
       });
     });
 
@@ -92,9 +98,13 @@ const SlideBuilder = {
       cell
         .getText()
         .getTextStyle()
-        .setFontSize(18)
+        .setFontSize(16)
         .setBold(true)
         .setForegroundColor(0, 0, 0);
+      totalCell1
+        .getText()
+        .getParagraphStyle()
+        .setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
     });
   },
 };

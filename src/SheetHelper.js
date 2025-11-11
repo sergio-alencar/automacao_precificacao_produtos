@@ -114,8 +114,13 @@ const SheetHelper = {
    * @return {string}
    */
   _parseString(value) {
-    if (value === null || value === undefined) return "";
+    if (value === null || value === undefined) {
+      return "";
+    }
 
-    return String(value).trim();
+    let strValue = String(value).trim();
+    const regex = /^munic[ií]pio de /i;
+
+    return strValue.replace(regex, "");
   },
 };
