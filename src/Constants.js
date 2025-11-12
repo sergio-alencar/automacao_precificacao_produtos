@@ -3,7 +3,8 @@
 const COLS = {
   MUNICIPIO: "Nome do município",
   UF: "Estado",
-  EMAIL: "Email para envio",
+  EMAIL: "Email(s) para envio (separe os emails com vírgula)",
+  EMAIL_CC: "Email(s) em cópia (separe os emails com vírgula)",
   POPULACAO: "População",
   RECEITA_ANUAL: "Receita corrente anual do município (R$)",
   FOLHA_MENSAL: "Folha de pagamento mensal (R$)",

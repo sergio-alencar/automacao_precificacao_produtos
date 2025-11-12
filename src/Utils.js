@@ -37,14 +37,10 @@ const Utils = {
    * @return {string}
    */
   formatValue(value) {
-    if (value === "NA_UF") {
-      return "Não aplicável para esta UF";
-    }
-
     if (value === null || value === undefined) {
-      return "Não Aplicável";
+      return "N/A";
     }
 
-    return this.formatCurrency(value);
+    return String(value);
   },
 };

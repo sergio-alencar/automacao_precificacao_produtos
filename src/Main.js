@@ -9,6 +9,7 @@ const OUTPUT_FOLDER_ID = "1edKkvPT0XXP-SrRHXw_tRATdnUamXBCR";
 const SHEET_NAME = "Respostas ao formulário 1";
 const STATUS_COLUMN_NAME = COLS.STATUS;
 const EMAIL_COLUMN_NAME = COLS.EMAIL;
+const EMAIL_CC_COLUMN_NAME = COLS.EMAIL_CC;
 
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -17,6 +18,9 @@ function onOpen() {
     .addToUi();
 }
 
+/**
+ * processa as linhas que estão selecionadas manualmente pelo usuário na planilha
+ */
 function processActiveRows() {
   const ui = SpreadsheetApp.getUi();
   const sheet =
@@ -39,60 +43,29 @@ function processActiveRows() {
   const lastCol = sheet.getLastColumn();
   const statusColIdx = SheetHelper.getColumnIndex(headers, STATUS_COLUMN_NAME);
   const emailColIdx = SheetHelper.getColumnIndex(headers, EMAIL_COLUMN_NAME);
+  const emailCCColIdx = SheetHelper.getColumnIndex(
+    headers,
+    EMAIL_CC_COLUMN_NAME
+  );
 
   let successCount = 0;
   let errorCount = 0;
 
   for (const currentRow of rowsToProcess) {
-    const statusCell = sheet.getRange(currentRow, statusColIdx + 1);
-    const rowData = sheet.getRange(currentRow, 1, 1, lastCol).getValues()[0];
-    const email = rowData[emailColIdx];
-
-    if (!email) {
-      statusCell.setValue("Erro: Email para envio não preenchido.");
-      errorCount++;
-      continue;
-    }
-
     try {
-      statusCell.setValue("Processando...");
-      SpreadsheetApp.flush();
-
-      const inputs = SheetHelper.mapRowToInputs(rowData, headers);
-      Logger.log(`Processing ${inputs[COLS.MUNICIPIO]}/${inputs[COLS.UF]}...`);
-
-      const results = ProductCalculator.calculateAllProducts(inputs);
-      Logger.log(`Calculated results: ${JSON.stringify(results)}`);
-
-      const pdfFile = SlideGenerator.generatePresentation(
-        TEMPLATE_ID,
-        OUTPUT_FOLDER_ID,
-        inputs[COLS.MUNICIPIO],
-        inputs[COLS.UF],
-        results
+      processSingleRow(
+        currentRow,
+        sheet,
+        headers,
+        lastCol,
+        statusColIdx,
+        emailColIdx,
+        emailCCColIdx
       );
-      Logger.log(`Presentation created: ${pdfFile.getName()}`);
-
-      EmailService.sendEmailWithAttachment(
-        email,
-        inputs[COLS.MUNICIPIO],
-        inputs[COLS.UF],
-        pdfFile
-      );
-      Logger.log(`Email sent to ${email}.`);
-
-      const url = pdfFile.getUrl();
-      statusCell
-        .setValue("Concluído")
-        .setRichTextValue(
-          SpreadsheetApp.newRichTextValue()
-            .setText("Concluído")
-            .setLinkUrl(url)
-            .build()
-        );
       successCount++;
     } catch (e) {
-      Logger.log(`Error processing row ${currentRow}: ${e.stack}`);
+      Logger.log(`Error processing row ${currentRow}: ${e}`);
+      const statusCell = sheet.getRange(currentRow, statusColIdx + 1);
       statusCell.setValue(`Erro: ${e.message}`);
       errorCount++;
     }
@@ -103,6 +76,10 @@ function processActiveRows() {
   );
 }
 
+/**
+ * processa a linha que acabou de ser enviada via Google Forms
+ * @param {Object} e
+ */
 function handleFormSubmit(e) {
   const currentRow = e.range.getRow();
 
@@ -115,57 +92,123 @@ function handleFormSubmit(e) {
     SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
   const headers = SheetHelper.getHeaders(sheet);
   const lastCol = sheet.getLastColumn();
-
   const statusColIdx = SheetHelper.getColumnIndex(headers, STATUS_COLUMN_NAME);
   const emailColIdx = SheetHelper.getColumnIndex(headers, EMAIL_COLUMN_NAME);
+  const emailCCColIdx = SheetHelper.getColumnIndex(
+    headers,
+    EMAIL_CC_COLUMN_NAME
+  );
 
   const statusCell = sheet.getRange(currentRow, statusColIdx + 1);
-  const rowData = sheet.getRange(currentRow, 1, 1, lastCol).getValues()[0];
-  const email = rowData[emailColIdx];
-
-  if (!email) {
-    statusCell.setValue("Erro: Email para envio não preenchido.");
-    return;
-  }
 
   try {
-    statusCell.setValue("Processando...");
-    SpreadsheetApp.flush();
-
-    const inputs = SheetHelper.mapRowToInputs(rowData, headers);
-    Logger.log(`Processing "${inputs[COLS.MUNICIPIO]}/${inputs[COLS.UF]}"...`);
-
-    const results = ProductCalculator.calculateAllProducts(inputs);
-    Logger.log(`Calculated results: ${JSON.stringify(results)}`);
-
-    const pdfFile = SlideGenerator.generatePresentation(
-      TEMPLATE_ID,
-      OUTPUT_FOLDER_ID,
-      inputs[COLS.MUNICIPIO],
-      inputs[COLS.UF],
-      results
+    processSingleRow(
+      currentRow,
+      sheet,
+      headers,
+      lastCol,
+      statusColIdx,
+      emailColIdx,
+      emailCCColIdx
     );
-    Logger.log(`Presentation created: ${pdfFile.getName()}`);
-
-    EmailService.sendEmailWithAttachment(
-      email,
-      inputs[COLS.MUNICIPIO],
-      inputs[COLS.UF],
-      pdfFile
-    );
-    Logger.log(`Email sent to ${email}.`);
-
-    const url = pdfFile.getUrl();
-    statusCell
-      .setValue("Concluído")
-      .setRichTextValue(
-        SpreadsheetApp.newRichTextValue()
-          .setText("Concluído")
-          .setLinkUrl(url)
-          .build()
-      );
   } catch (err) {
     Logger.log(`Error processing row ${currentRow}: ${err.stack}`);
     statusCell.setValue(`Erro: ${err.message}`);
+
+    try {
+      const rowData = sheet.getRange(currentRow, 1, 1, lastCol).getValues()[0];
+      const email = rowData[emailColIdx];
+      const municipio =
+        rowData[headers.indexOf(COLS.MUNICIPIO)] || "Município Desconhecido";
+
+      if (email) {
+        const subject = `Erro ao gerar apresentação para Prefeitura Municipal de ${municipio}`;
+        const body = `
+            Olá,
+            <br>
+            Ocorreu um erro ao tentar gerar automaticamente a apresentação para a <strong>Prefeitura Municipal de ${municipio}</strong>.
+            <br><br>
+            <strong>Detalhe do erro:</strong> ${err.message}
+            <br><br>
+            A linha ${currentRow} da planilha foi marcada como "Erro".
+            <br><br>
+            <i>Esta é uma mensagem automática.</i>
+        `;
+        MailApp.sendEmail({
+          to: email,
+          subject: subject,
+          htmlBody: body,
+        });
+        Logger.log(`Error notification email sent to ${email}.`);
+      }
+    } catch (emailError) {
+      Logger.log(
+        `CRITICAL: Failed to send error notification email. ${emailError.stack}`
+      );
+    }
   }
+}
+
+/**
+ * contém toda a lógica principal para processar uma única linha da planilha
+ * retorna true em caso de sucesso
+ */
+function processSingleRow(
+  currentRow,
+  sheet,
+  headers,
+  lastCol,
+  statusColIdx,
+  emailColIdx,
+  emailCCColIdx
+) {
+  const statusCell = sheet.getRange(currentRow, statusColIdx + 1);
+  const rowData = sheet.getRange(currentRow, 1, 1, lastCol).getValues()[0];
+  const email = rowData[emailColIdx];
+  const emailCC = rowData[emailCCColIdx];
+
+  if (!email) {
+    statusCell.setValue("Erro: Email para envio não preenchido.");
+    throw new Error("Email para envio não preenchido.");
+  }
+
+  statusCell.setValue("Processando...");
+  SpreadsheetApp.flush();
+
+  const inputs = SheetHelper.mapRowToInputs(rowData, headers);
+  Logger.log(`Processing "${inputs[COLS.MUNICIPIO]}/${inputs[COLS.UF]}"...`);
+
+  const results = ProductCalculator.calculateAllProducts(inputs);
+  Logger.log(`Calculated results: ${JSON.stringify(results)}`);
+
+  const pdfFile = SlideGenerator.generatePresentation(
+    TEMPLATE_ID,
+    OUTPUT_FOLDER_ID,
+    inputs[COLS.MUNICIPIO],
+    inputs[COLS.UF],
+    results
+  );
+  Logger.log(`Presentation created: ${pdfFile.getName()}`);
+
+  EmailService.sendEmailWithAttachment(
+    email,
+    emailCC,
+    inputs[COLS.MUNICIPIO],
+    inputs[COLS.UF],
+    pdfFile
+  );
+
+  Logger.log(
+    `Email sent to ${email}` + (emailCC ? ` with copy to ${emailCC}.` : ".")
+  );
+
+  const url = pdfFile.getUrl();
+  statusCell
+    .setValue("Concluído")
+    .setRichTextValue(
+      SpreadsheetApp.newRichTextValue()
+        .setText("Concluído")
+        .setLinkUrl(url)
+        .build()
+    );
 }

@@ -3,26 +3,24 @@
 const EmailService = {
   /**
    * @param {string} recipientEmail
+   * @param {string} emailCC
    * @param {string} municipio
    * @param {string} uf
    * @param {GoogleAppsScript.Drive.File} pdfFile
    */
-  sendEmailWithAttachment(recipientEmail, municipio, uf, pdfFile) {
+  sendEmailWithAttachment(recipientEmail, emailCC, municipio, uf, pdfFile) {
     const subject = `MSL - Apresentação de Precificação - ${municipio}/${uf}`;
-    const body = `
-    Olá,
-    <br><br>
-    Envio em anexo a apresentação de estimativa de precificação para ${municipio}/${uf}.
-    <br><br>
-    Este é um email automático.
-    <br><br>
-    Atenciosamente,
-    <br>
-    Equipe MSL
-    `;
+    const body = EMAIL_BODY.replace("{{MUNICIPIO}}", municipio).replace(
+      "{{UF}}",
+      uf
+    );
+
+    const to = recipientEmail.replace(/;/g, ",");
+    const cc = emailCC ? emailCC.replace(/;/g, ",") : null;
 
     MailApp.sendEmail({
-      to: recipientEmail,
+      to: to,
+      cc: cc,
       subject: subject,
       htmlBody: body,
       attachments: [pdfFile.getAs(MimeType.PDF)],

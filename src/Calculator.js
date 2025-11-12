@@ -26,6 +26,21 @@ const ProductCalculator = {
       .replace(/[^a-z0-9]/g, "");
   },
 
+  /**
+   * @param {string | number} value
+   * @returns {number}
+   */
+  _normalizeValue(value) {
+    if (value === null || value === undefined || value === "") {
+      return NaN;
+    }
+
+    let cleanString = String(value);
+    cleanString = cleanString.replace("R$", "").replace(/,/g, "");
+
+    return parseFloat(cleanString);
+  },
+
   cfurh(inputs) {
     const defaultTar = 79.62;
     const defaultTotalArea = 250;
@@ -51,7 +66,7 @@ const ProductCalculator = {
   cfem(inputs) {
     if (inputs[COLS.UF] !== "MG" && inputs[COLS.UF] !== "PA") {
       Logger.log(`CFEM: Skipping. State "${inputs[COLS.UF]}" is not MG or PA.`);
-      return "NA_UF";
+      return null;
     }
 
     if (
@@ -103,8 +118,8 @@ const ProductCalculator = {
     } else {
       percentual = 0.6;
     }
-    // não tem piso de R$ 500k no doc
-    return folhaAcrescida * percentual;
+
+    return this.applyGlobalFloor(folhaAcrescida * percentual);
   },
 
   rat_fap(inputs) {
@@ -223,7 +238,7 @@ const ProductCalculator = {
       const rowMunNorm = this._normalizeString(row[munIndex]);
 
       if (rowMunNorm.startsWith(inputMunNorm) && rowUfNorm === inputUFNorm) {
-        const verbeteValue = parseFloat(row[verbeteIndex]);
+        const verbeteValue = this._normalizeValue(row[verbeteIndex]);
         if (!isNaN(verbeteValue)) {
           sum += verbeteValue;
         }
@@ -232,12 +247,12 @@ const ProductCalculator = {
 
     if (sum === 0) {
       Logger.log(
-        `ISSQN: No value found for ${inputMunNorm};${inputUFNorm} on ESTBAN sheet.`
+        `ISSQN: No value found for ${inputMunNorm}/${inputUFNorm} on ESTBAN sheet.`
       );
       return null;
     }
 
-    const calculation = ((sum * 0.2 * 12 * 0.25 * 0.5) / 12) * 60;
+    const calculation = ((sum * 0.2 * 12 * 0.25 * 0.05) / 12) * 60;
 
     return this.applyGlobalFloor(calculation);
   },

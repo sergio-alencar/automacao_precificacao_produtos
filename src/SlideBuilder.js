@@ -9,7 +9,11 @@ const SlideBuilder = {
    * @param {number} totalSum
    */
   createTableOnSlide(slide, municipio, uf, results, totalSum) {
-    const numRows = results.length + 2;
+    const validResults = results.filter(
+      (r) => r.value !== null && r.value !== undefined
+    );
+
+    const numRows = validResults.length + 2;
     const numCols = 2;
     const left = 650;
     const top = 250;
@@ -17,6 +21,7 @@ const SlideBuilder = {
     const height = numRows * 35;
 
     const table = slide.insertTable(numRows, numCols, left, top, width, height);
+
     for (let i = 0; i < numRows; i++) {
       const row = table.getRow(i);
       for (let j = 0; j < numCols; j++) {
@@ -63,7 +68,7 @@ const SlideBuilder = {
         .setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
     });
 
-    results.forEach((result, index) => {
+    validResults.forEach((result, index) => {
       const row = table.getRow(index + 1);
 
       const cell0 = row.getCell(0);
