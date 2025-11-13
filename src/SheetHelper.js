@@ -83,6 +83,7 @@ const SheetHelper = {
 
       inputs[header] = cleanValue;
     });
+
     return inputs;
   },
 
@@ -101,11 +102,10 @@ const SheetHelper = {
 
     const cleanString = String(value)
       .replace("R$", "")
-      .replace(/\./g, "")
       .replace(",", ".")
       .trim();
-
     const number = parseFloat(cleanString);
+
     return isNaN(number) ? undefined : number;
   },
 
