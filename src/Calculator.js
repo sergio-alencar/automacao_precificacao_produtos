@@ -231,7 +231,6 @@ const ProductCalculator = {
     }
 
     let sum = 0;
-
     for (let i = 1; i < estbanData.length; i++) {
       const row = estbanData[i];
       const rowUfNorm = this._normalizeString(row[ufIndex]);
@@ -247,9 +246,9 @@ const ProductCalculator = {
 
     if (sum === 0) {
       Logger.log(
-        `ISSQN: No value found for ${inputMunNorm}/${inputUFNorm} on ESTBAN sheet.`
+        `ISSQN: No value found for ${inputMunNorm}/${inputUFNorm} on ESTBAN sheet. Applying default floor value.`
       );
-      return null;
+      return this.applyGlobalFloor(0);
     }
 
     const calculation = ((sum * 0.2 * 12 * 0.25 * 0.05) / 12) * 60;
