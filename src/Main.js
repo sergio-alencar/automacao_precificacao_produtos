@@ -10,6 +10,7 @@ const SHEET_NAME = "Respostas ao formulário 1";
 const STATUS_COLUMN_NAME = COLS.STATUS;
 const EMAIL_COLUMN_NAME = COLS.EMAIL;
 const EMAIL_CC_COLUMN_NAME = COLS.EMAIL_CC;
+const ADMIN_NOTIFICATION_EMAIL = "gabriela.leao@msladvocacia.com.br";
 
 function onOpen() {
   SpreadsheetApp.getUi()
@@ -117,30 +118,27 @@ function handleFormSubmit(e) {
 
     try {
       const rowData = sheet.getRange(currentRow, 1, 1, lastCol).getValues()[0];
-      const email = rowData[emailColIdx];
       const municipio =
         rowData[headers.indexOf(COLS.MUNICIPIO)] || "Município Desconhecido";
 
-      if (email) {
-        const subject = `Erro ao gerar apresentação para Prefeitura Municipal de ${municipio}`;
-        const body = `
+      const subject = `[AUTOMAÇÃO ]Erro ao gerar apresentação para ${municipio}`;
+      const body = `
             Olá,
             <br>
-            Ocorreu um erro ao tentar gerar automaticamente a apresentação para a <strong>Prefeitura Municipal de ${municipio}</strong>.
+            Ocorreu um erro fatal ao tentar gerar automaticamente a apresentação para a <strong>Prefeitura Municipal de ${municipio}</strong> (Linha ${currentRow}).
             <br><br>
             <strong>Detalhe do erro:</strong> ${err.message}
             <br><br>
-            A linha ${currentRow} da planilha foi marcada como "Erro".
-            <br><br>
             <i>Esta é uma mensagem automática.</i>
         `;
-        MailApp.sendEmail({
-          to: email,
-          subject: subject,
-          htmlBody: body,
-        });
-        Logger.log(`Error notification email sent to ${email}.`);
-      }
+      MailApp.sendEmail({
+        to: ADMIN_NOTIFICATION_EMAIL,
+        subject: subject,
+        htmlBody: body,
+      });
+      Logger.log(
+        `Error notification email sent to ${ADMIN_NOTIFICATION_EMAIL}.`
+      );
     } catch (emailError) {
       Logger.log(
         `CRITICAL: Failed to send error notification email. ${emailError.stack}`
@@ -149,10 +147,6 @@ function handleFormSubmit(e) {
   }
 }
 
-/**
- * contém toda a lógica principal para processar uma única linha da planilha
- * retorna true em caso de sucesso
- */
 function processSingleRow(
   currentRow,
   sheet,
@@ -181,12 +175,38 @@ function processSingleRow(
   const results = ProductCalculator.calculateAllProducts(inputs);
   Logger.log(`Calculated results: ${JSON.stringify(results)}`);
 
+  const desiredProductsRaw = inputs[COLS.DESIRED_PRODUCTS] || "";
+
+  const desiredProductsSet = new Set(
+    desiredProductsRaw.split(",").map((p) => {
+      const trimmed = p.trim();
+
+      if (trimmed === "FUNDEB/VAAR") {
+        return "FUNDEB VAAR";
+      }
+
+      if (trimmed === "FUNDEB/VAAT") {
+        return "FUNDEB VAAT";
+      }
+
+      return trimmed;
+    })
+  );
+
+  const finalResults = results.filter((r) => desiredProductsSet.has(r.name));
+
+  const missingProducts = results.filter(
+    (r) =>
+      (desiredProductsSet.has(r.name) && r.value === null) ||
+      r.value === undefined
+  );
+
   const pdfFile = SlideGenerator.generatePresentation(
     TEMPLATE_ID,
     OUTPUT_FOLDER_ID,
     inputs[COLS.MUNICIPIO],
     inputs[COLS.UF],
-    results
+    finalResults
   );
   Logger.log(`Presentation created: ${pdfFile.getName()}`);
 
@@ -201,6 +221,40 @@ function processSingleRow(
   Logger.log(
     `Email sent to ${email}` + (emailCC ? ` with copy to ${emailCC}.` : ".")
   );
+
+  if (missingProducts.length > 0) {
+    try {
+      const subject = `[AUTOMAÇÃO] Alerta de produtos faltantes para ${
+        inputs[COLS.MUNICIPIO]
+      }`;
+      let body = `
+        Olá,
+        <br><br>
+        A apresentação para <strong>${
+          inputs[COLS.MUNICIPIO]
+        }</strong> (Linha ${currentRow}) foi gerada com sucesso, mas os seguintes produtos selecionados não puderam ser calculados:
+        <br>
+        <ul>
+      `;
+
+      missingProducts.forEach((product) => {
+        body += `<li>${product.name}</li>`;
+      });
+
+      body += "</ul><br><i>Esta é uma mensagem automática.</i>";
+
+      MailApp.sendEmail({
+        to: ADMIN_NOTIFICATION_EMAIL,
+        subject: subject,
+        htmlBody: body,
+      });
+      Logger.log(`Missing products alert sent to ${ADMIN_NOTIFICATION_EMAIL}.`);
+    } catch (alertError) {
+      Logger.log(
+        `Failed to send missing product alert email. ${alertError.stack}`
+      );
+    }
+  }
 
   const url = pdfFile.getUrl();
   statusCell

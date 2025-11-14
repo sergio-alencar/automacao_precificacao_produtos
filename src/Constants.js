@@ -18,4 +18,5 @@ const COLS = {
   AREA_RESERVATORIO: "Área total do reservatório (km²)",
   TAR: "TAR - Tarifa de referência (R$)",
   STATUS: "Status",
+  DESIRED_PRODUCTS: "Produtos que quero incluir na proposta:",
 };

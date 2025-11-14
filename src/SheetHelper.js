@@ -102,6 +102,7 @@ const SheetHelper = {
 
     const cleanString = String(value)
       .replace("R$", "")
+      .replace(/\./g, "")
       .replace(",", ".")
       .trim();
     const number = parseFloat(cleanString);

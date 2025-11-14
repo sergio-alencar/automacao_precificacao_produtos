@@ -41,6 +41,26 @@ const ProductCalculator = {
     return parseFloat(cleanString);
   },
 
+  cfem(inputs) {
+    if (inputs[COLS.UF] !== "MG" && inputs[COLS.UF] !== "PA") {
+      Logger.log(`CFEM: Skipping. State "${inputs[COLS.UF]}" is not MG or PA.`);
+      return null;
+    }
+
+    if (
+      inputs[COLS.CFEM_RECEITA] === undefined ||
+      inputs[COLS.CFEM_RECEITA] === null
+    ) {
+      Logger.log(`CFEM: Skipping. Missing input ("${COLS.CFEM_RECEITA}").`);
+      return null;
+    }
+
+    const floor = 2500000;
+    const calculation = inputs[COLS.CFEM_RECEITA] * 5 * 0.15;
+
+    return Math.max(calculation, floor);
+  },
+
   cfurh(inputs) {
     const defaultTar = 79.62;
     const defaultTotalArea = 250;
@@ -60,125 +80,7 @@ const ProductCalculator = {
       tar *
       (inputs[COLS.AREA_INUNDADA] / totalArea) *
       margin;
-    return this.applyGlobalFloor(calculation);
-  },
 
-  cfem(inputs) {
-    if (inputs[COLS.UF] !== "MG" && inputs[COLS.UF] !== "PA") {
-      Logger.log(`CFEM: Skipping. State "${inputs[COLS.UF]}" is not MG or PA.`);
-      return null;
-    }
-
-    if (
-      inputs[COLS.CFEM_RECEITA] === undefined ||
-      inputs[COLS.CFEM_RECEITA] === null
-    ) {
-      Logger.log(`CFEM: Skipping. Missing input ("${COLS.CFEM_RECEITA}").`);
-      return null;
-    }
-
-    const floor = 2500000;
-    const calculation = inputs[COLS.CFEM_RECEITA] * 5 * 0.15;
-    return Math.max(calculation, floor);
-  },
-
-  irrf(inputs) {
-    if (!inputs[COLS.RECEITA_ANUAL]) {
-      Logger.log(`IRRF: Skipping. Missing input ("${COLS.RECEITA_ANUAL}").`);
-      return null;
-    }
-
-    const rcl = inputs[COLS.RECEITA_ANUAL];
-    const p1 = rcl * 0.25 * 0.1 * 0.0024;
-    const p2 = rcl * 0.25 * 0.2 * 0.01;
-    const p3 = rcl * 0.25 * 0.3 * 0.02;
-    const p4 = rcl * 0.25 * 0.4 * 0.035;
-    const calculation = (p1 + p2 + p3 + p4) * 5 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
-
-  verbas(inputs) {
-    if (!inputs[COLS.NUM_SERVIDORES] || !inputs[COLS.FOLHA_MENSAL]) {
-      Logger.log(
-        `Verbas: Skipping. Missing inputs ("${COLS.NUM_SERVIDORES}" or "${COLS.FOLHA_MENSAL}").`
-      );
-      return null;
-    }
-
-    const folhaAcrescida = inputs[COLS.FOLHA_MENSAL] * 1.2;
-    let percentual;
-    if (inputs[COLS.NUM_SERVIDORES] <= 300) {
-      percentual = 1.0;
-    } else if (inputs[COLS.NUM_SERVIDORES] <= 600) {
-      percentual = 0.9;
-    } else if (inputs[COLS.NUM_SERVIDORES] <= 1000) {
-      percentual = 0.8;
-    } else if (inputs[COLS.NUM_SERVIDORES] <= 2000) {
-      percentual = 0.7;
-    } else {
-      percentual = 0.6;
-    }
-
-    return this.applyGlobalFloor(folhaAcrescida * percentual);
-  },
-
-  rat_fap(inputs) {
-    if (!inputs[COLS.FOLHA_MENSAL]) {
-      Logger.log(`RAT/FAP: Skipping. Missing input ("${COLS.FOLHA_MENSAL}").`);
-      return null;
-    }
-
-    const calculation = inputs[COLS.FOLHA_MENSAL] * 60 * 0.01 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
-
-  fundeb_vaar(inputs) {
-    if (!inputs[COLS.NUM_ALUNOS]) {
-      Logger.log(`VAAR: Skipping. Missing input ("${COLS.NUM_ALUNOS}").`);
-      return null;
-    }
-
-    const calculation = inputs[COLS.NUM_ALUNOS] * 32.5 * 1 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
-
-  fundeb_vaat(inputs) {
-    if (!inputs[COLS.NUM_ALUNOS]) {
-      Logger.log(`VAAT: Skipping. Missing input ("${COLS.NUM_ALUNOS}").`);
-      return null;
-    }
-
-    const calculation = inputs[COLS.NUM_ALUNOS] * 97.5 * 2 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
-
-  fpm(inputs) {
-    if (!inputs[COLS.RECEITA_ANUAL]) {
-      Logger.log(`FPM: Skipping. Missing input ("${COLS.RECEITA_ANUAL}").`);
-      return null;
-    }
-
-    const calculation = inputs[COLS.RECEITA_ANUAL] * 0.03 * 5 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
-
-  vaf(inputs) {
-    if (!inputs[COLS.ICMS_ANUAL]) {
-      Logger.log(`VAF: Skipping. Missing input ("${COLS.ICMS_ANUAL}").`);
-      return null;
-    }
-
-    const calculation = inputs[COLS.ICMS_ANUAL] * 0.04 * 5 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
-
-  tunep(inputs) {
-    if (!inputs[COLS.POPULACAO]) {
-      Logger.log(`TUNEP: Skipping. Missing input ("${COLS.POPULACAO}").`);
-      return null;
-    }
-
-    const calculation = inputs[COLS.POPULACAO] * 180 * 5 * 1.15;
     return this.applyGlobalFloor(calculation);
   },
 
@@ -196,11 +98,62 @@ const ProductCalculator = {
     }
 
     const calculation = inputs[COLS.POPULACAO] * 0.055 * 2500 * 1.2;
+
+    return this.applyGlobalFloor(calculation);
+  },
+
+  fpm(inputs) {
+    if (!inputs[COLS.RECEITA_ANUAL]) {
+      Logger.log(`FPM: Skipping. Missing input ("${COLS.RECEITA_ANUAL}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.RECEITA_ANUAL] * 0.03 * 5 * 1.15;
+
+    return this.applyGlobalFloor(calculation);
+  },
+
+  fundeb_vaar(inputs) {
+    if (!inputs[COLS.NUM_ALUNOS]) {
+      Logger.log(`VAAR: Skipping. Missing input ("${COLS.NUM_ALUNOS}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.NUM_ALUNOS] * 32.5 * 1 * 1.15;
+
+    return this.applyGlobalFloor(calculation);
+  },
+
+  fundeb_vaat(inputs) {
+    if (!inputs[COLS.NUM_ALUNOS]) {
+      Logger.log(`VAAT: Skipping. Missing input ("${COLS.NUM_ALUNOS}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.NUM_ALUNOS] * 97.5 * 2 * 1.15;
+
+    return this.applyGlobalFloor(calculation);
+  },
+
+  irrf(inputs) {
+    if (!inputs[COLS.RECEITA_ANUAL]) {
+      Logger.log(`IRRF: Skipping. Missing input ("${COLS.RECEITA_ANUAL}").`);
+      return null;
+    }
+
+    const rcl = inputs[COLS.RECEITA_ANUAL];
+    const p1 = rcl * 0.25 * 0.1 * 0.0024;
+    const p2 = rcl * 0.25 * 0.2 * 0.01;
+    const p3 = rcl * 0.25 * 0.3 * 0.02;
+    const p4 = rcl * 0.25 * 0.4 * 0.035;
+    const calculation = (p1 + p2 + p3 + p4) * 5 * 1.15;
+
     return this.applyGlobalFloor(calculation);
   },
 
   issqn(inputs) {
     let estbanData;
+
     try {
       estbanData = getEstbanData();
     } catch (e) {
@@ -231,6 +184,7 @@ const ProductCalculator = {
     }
 
     let sum = 0;
+
     for (let i = 1; i < estbanData.length; i++) {
       const row = estbanData[i];
       const rowUfNorm = this._normalizeString(row[ufIndex]);
@@ -238,6 +192,7 @@ const ProductCalculator = {
 
       if (rowMunNorm.startsWith(inputMunNorm) && rowUfNorm === inputUFNorm) {
         const verbeteValue = this._normalizeValue(row[verbeteIndex]);
+
         if (!isNaN(verbeteValue)) {
           sum += verbeteValue;
         }
@@ -256,30 +211,94 @@ const ProductCalculator = {
     return this.applyGlobalFloor(calculation);
   },
 
+  rat_fap(inputs) {
+    if (!inputs[COLS.FOLHA_MENSAL]) {
+      Logger.log(`RAT/FAP: Skipping. Missing input ("${COLS.FOLHA_MENSAL}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.FOLHA_MENSAL] * 60 * 0.01 * 1.15;
+
+    return this.applyGlobalFloor(calculation);
+  },
+
+  tunep(inputs) {
+    if (!inputs[COLS.POPULACAO]) {
+      Logger.log(`TUNEP: Skipping. Missing input ("${COLS.POPULACAO}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.POPULACAO] * 180 * 5 * 1.15;
+
+    return this.applyGlobalFloor(calculation);
+  },
+
+  vaf(inputs) {
+    if (!inputs[COLS.ICMS_ANUAL]) {
+      Logger.log(`VAF: Skipping. Missing input ("${COLS.ICMS_ANUAL}").`);
+      return null;
+    }
+
+    const calculation = inputs[COLS.ICMS_ANUAL] * 0.04 * 5 * 1.15;
+
+    return this.applyGlobalFloor(calculation);
+  },
+
+  verbas(inputs) {
+    if (!inputs[COLS.NUM_SERVIDORES] || !inputs[COLS.FOLHA_MENSAL]) {
+      Logger.log(
+        `Verbas: Skipping. Missing inputs ("${COLS.NUM_SERVIDORES}" or "${COLS.FOLHA_MENSAL}").`
+      );
+      return null;
+    }
+
+    const folhaAcrescida = inputs[COLS.FOLHA_MENSAL] * 1.2;
+    let percentual;
+
+    if (inputs[COLS.NUM_SERVIDORES] <= 300) {
+      percentual = 1.0;
+    } else if (inputs[COLS.NUM_SERVIDORES] <= 600) {
+      percentual = 0.9;
+    } else if (inputs[COLS.NUM_SERVIDORES] <= 1000) {
+      percentual = 0.8;
+    } else if (inputs[COLS.NUM_SERVIDORES] <= 2000) {
+      percentual = 0.7;
+    } else {
+      percentual = 0.6;
+    }
+
+    return this.applyGlobalFloor(folhaAcrescida * percentual);
+  },
+
   /**
    * @param {Object} inputs
    * @returns {Array<Object>}
    */
   calculateAllProducts(inputs) {
     const productMap = [
-      { name: "CFURH", fn: this.cfurh.bind(this) },
       { name: "CFEM", fn: this.cfem.bind(this) },
-      { name: "IRRF", fn: this.irrf.bind(this) },
-      { name: "Verbas Indenizatórias", fn: this.verbas.bind(this) },
-      { name: "RAT/FAP", fn: this.rat_fap.bind(this) },
+      { name: "CFURH", fn: this.cfurh.bind(this) },
+      { name: "COMPREV", fn: this.comprev.bind(this) },
+      { name: "FPM", fn: this.fpm.bind(this) },
       { name: "FUNDEB VAAR", fn: this.fundeb_vaar.bind(this) },
       { name: "FUNDEB VAAT", fn: this.fundeb_vaat.bind(this) },
-      { name: "FPM", fn: this.fpm.bind(this) },
-      { name: "VAF", fn: this.vaf.bind(this) },
-      { name: "TUNEP", fn: this.tunep.bind(this) },
-      { name: "COMPREV", fn: this.comprev.bind(this) },
+      { name: "IRRF", fn: this.irrf.bind(this) },
       { name: "ISSQN", fn: this.issqn.bind(this) },
+      { name: "RAT/FAP", fn: this.rat_fap.bind(this) },
+      { name: "TUNEP", fn: this.tunep.bind(this) },
+      { name: "VAF", fn: this.vaf.bind(this) },
+      { name: "Verbas Indenizatórias", fn: this.verbas.bind(this) },
     ];
 
     const results = [];
+
     for (const product of productMap) {
-      results.push({ name: product.name, value: product.fn(inputs) });
+      results.push({
+        name: product.name,
+        value: product.fn(inputs),
+      });
     }
+
     return results;
   },
 };
