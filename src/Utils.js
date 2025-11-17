@@ -10,10 +10,7 @@ const Utils = {
       return this.formatValue(value);
     }
 
-    return value.toLocaleString("pt-BR", {
-      style: "currency",
-      currency: "BRL",
-    });
+    return value.toLocaleString("pt-BR", { style: "currency", currency: "BRL" });
   },
 
   /**
@@ -21,15 +18,26 @@ const Utils = {
    * @return {string}
    */
   formatTotalSummary(value) {
-    if (value < 1000000) {
-      return `${Math.round(value / 1000)} MIL`;
-    } else if (value < 1000000000) {
-      const finalValue = Math.round(value / 1000000);
-      return finalValue > 1 ? `${finalValue} MILHÕES` : `${finalValue} MILHÃO`;
+    let val, suffix;
+
+    if (value < 1e6) {
+      val = value / 1e3;
+      suffix = "MIL";
+    } else if (value < 1e9) {
+      val = value / 1e6;
+      suffix = val >= 2 ? "MILHÕES" : "MILHÃO";
+    } else if (value < 1e12) {
+      val = value / 1e9;
+      suffix = val >= 2 ? "BILHÕES" : "BILHÃO";
     } else {
-      const finalValue = Math.round(value / 1000000000);
-      return finalValue > 1 ? `${finalValue} BILHÕES` : `${finalValue} BILHÃO`;
+      val = value / 1e12;
+      suffix = val >= 2 ? "TRILHÕES" : "TRILHÃO";
     }
+
+    let finalString = val.toFixed(1).replace(".", ",");
+    finalString = finalString.endsWith(",0") ? finalString.slice(0, -2) : finalString;
+
+    return `${finalString} ${suffix}`;
   },
 
   /**

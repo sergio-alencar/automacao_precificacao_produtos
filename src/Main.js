@@ -24,8 +24,7 @@ function onOpen() {
  */
 function processActiveRows() {
   const ui = SpreadsheetApp.getUi();
-  const sheet =
-    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
 
   if (!sheet) {
     ui.alert(`Erro: A aba "${SHEET_NAME}" não foi encontrada.`);
@@ -33,10 +32,9 @@ function processActiveRows() {
   }
 
   const rowsToProcess = SheetHelper.getRowsToProcess(sheet);
+
   if (rowsToProcess.length === 0) {
-    ui.alert(
-      "Por favor, selecione uma ou mais células em linhas de dados (abaixo do cabeçalho)."
-    );
+    ui.alert("Por favor, selecione uma ou mais células em linhas de dados (abaixo do cabeçalho).");
     return;
   }
 
@@ -44,25 +42,14 @@ function processActiveRows() {
   const lastCol = sheet.getLastColumn();
   const statusColIdx = SheetHelper.getColumnIndex(headers, STATUS_COLUMN_NAME);
   const emailColIdx = SheetHelper.getColumnIndex(headers, EMAIL_COLUMN_NAME);
-  const emailCCColIdx = SheetHelper.getColumnIndex(
-    headers,
-    EMAIL_CC_COLUMN_NAME
-  );
+  const emailCCColIdx = SheetHelper.getColumnIndex(headers, EMAIL_CC_COLUMN_NAME);
 
   let successCount = 0;
   let errorCount = 0;
 
   for (const currentRow of rowsToProcess) {
     try {
-      processSingleRow(
-        currentRow,
-        sheet,
-        headers,
-        lastCol,
-        statusColIdx,
-        emailColIdx,
-        emailCCColIdx
-      );
+      processSingleRow(currentRow, sheet, headers, lastCol, statusColIdx, emailColIdx, emailCCColIdx);
       successCount++;
     } catch (e) {
       Logger.log(`Error processing row ${currentRow}: ${e}`);
@@ -72,9 +59,7 @@ function processActiveRows() {
     }
   }
 
-  ui.alert(
-    `Processamento concluído.\nSucessos: ${successCount}\nErros: ${errorCount}`
-  );
+  ui.alert(`Processamento concluído.\nSucessos: ${successCount}\nErros: ${errorCount}`);
 }
 
 /**
@@ -89,38 +74,23 @@ function handleFormSubmit(e) {
     return;
   }
 
-  const sheet =
-    SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
+  const sheet = SpreadsheetApp.getActiveSpreadsheet().getSheetByName(SHEET_NAME);
   const headers = SheetHelper.getHeaders(sheet);
   const lastCol = sheet.getLastColumn();
   const statusColIdx = SheetHelper.getColumnIndex(headers, STATUS_COLUMN_NAME);
   const emailColIdx = SheetHelper.getColumnIndex(headers, EMAIL_COLUMN_NAME);
-  const emailCCColIdx = SheetHelper.getColumnIndex(
-    headers,
-    EMAIL_CC_COLUMN_NAME
-  );
-
+  const emailCCColIdx = SheetHelper.getColumnIndex(headers, EMAIL_CC_COLUMN_NAME);
   const statusCell = sheet.getRange(currentRow, statusColIdx + 1);
 
   try {
-    processSingleRow(
-      currentRow,
-      sheet,
-      headers,
-      lastCol,
-      statusColIdx,
-      emailColIdx,
-      emailCCColIdx
-    );
+    processSingleRow(currentRow, sheet, headers, lastCol, statusColIdx, emailColIdx, emailCCColIdx);
   } catch (err) {
     Logger.log(`Error processing row ${currentRow}: ${err.stack}`);
     statusCell.setValue(`Erro: ${err.message}`);
 
     try {
       const rowData = sheet.getRange(currentRow, 1, 1, lastCol).getValues()[0];
-      const municipio =
-        rowData[headers.indexOf(COLS.MUNICIPIO)] || "Município Desconhecido";
-
+      const municipio = rowData[headers.indexOf(COLS.MUNICIPIO)] || "Município Desconhecido";
       const subject = `[AUTOMAÇÃO ]Erro ao gerar apresentação para ${municipio}`;
       const body = `
             Olá,
@@ -136,26 +106,14 @@ function handleFormSubmit(e) {
         subject: subject,
         htmlBody: body,
       });
-      Logger.log(
-        `Error notification email sent to ${ADMIN_NOTIFICATION_EMAIL}.`
-      );
+      Logger.log(`Error notification email sent to ${ADMIN_NOTIFICATION_EMAIL}.`);
     } catch (emailError) {
-      Logger.log(
-        `CRITICAL: Failed to send error notification email. ${emailError.stack}`
-      );
+      Logger.log(`CRITICAL: Failed to send error notification email. ${emailError.stack}`);
     }
   }
 }
 
-function processSingleRow(
-  currentRow,
-  sheet,
-  headers,
-  lastCol,
-  statusColIdx,
-  emailColIdx,
-  emailCCColIdx
-) {
+function processSingleRow(currentRow, sheet, headers, lastCol, statusColIdx, emailColIdx, emailCCColIdx) {
   const statusCell = sheet.getRange(currentRow, statusColIdx + 1);
   const rowData = sheet.getRange(currentRow, 1, 1, lastCol).getValues()[0];
   const email = rowData[emailColIdx];
@@ -176,7 +134,6 @@ function processSingleRow(
   Logger.log(`Calculated results: ${JSON.stringify(results)}`);
 
   const desiredProductsRaw = inputs[COLS.DESIRED_PRODUCTS] || "";
-
   const desiredProductsSet = new Set(
     desiredProductsRaw.split(",").map((p) => {
       const trimmed = p.trim();
@@ -196,9 +153,7 @@ function processSingleRow(
   const finalResults = results.filter((r) => desiredProductsSet.has(r.name));
 
   const missingProducts = results.filter(
-    (r) =>
-      (desiredProductsSet.has(r.name) && r.value === null) ||
-      r.value === undefined
+    (r) => (desiredProductsSet.has(r.name) && r.value === null) || r.value === undefined
   );
 
   const pdfFile = SlideGenerator.generatePresentation(
@@ -210,23 +165,13 @@ function processSingleRow(
   );
   Logger.log(`Presentation created: ${pdfFile.getName()}`);
 
-  EmailService.sendEmailWithAttachment(
-    email,
-    emailCC,
-    inputs[COLS.MUNICIPIO],
-    inputs[COLS.UF],
-    pdfFile
-  );
+  EmailService.sendEmailWithAttachment(email, emailCC, inputs[COLS.MUNICIPIO], inputs[COLS.UF], pdfFile);
 
-  Logger.log(
-    `Email sent to ${email}` + (emailCC ? ` with copy to ${emailCC}.` : ".")
-  );
+  Logger.log(`Email sent to ${email}` + (emailCC ? ` with copy to ${emailCC}.` : "."));
 
   if (missingProducts.length > 0) {
     try {
-      const subject = `[AUTOMAÇÃO] Alerta de produtos faltantes para ${
-        inputs[COLS.MUNICIPIO]
-      }`;
+      const subject = `[AUTOMAÇÃO] Alerta de produtos faltantes para ${inputs[COLS.MUNICIPIO]}`;
       let body = `
         Olá,
         <br><br>
@@ -250,19 +195,12 @@ function processSingleRow(
       });
       Logger.log(`Missing products alert sent to ${ADMIN_NOTIFICATION_EMAIL}.`);
     } catch (alertError) {
-      Logger.log(
-        `Failed to send missing product alert email. ${alertError.stack}`
-      );
+      Logger.log(`Failed to send missing product alert email. ${alertError.stack}`);
     }
   }
 
   const url = pdfFile.getUrl();
   statusCell
     .setValue("Concluído")
-    .setRichTextValue(
-      SpreadsheetApp.newRichTextValue()
-        .setText("Concluído")
-        .setLinkUrl(url)
-        .build()
-    );
+    .setRichTextValue(SpreadsheetApp.newRichTextValue().setText("Concluído").setLinkUrl(url).build());
 }

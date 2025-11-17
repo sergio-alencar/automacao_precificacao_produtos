@@ -16,6 +16,7 @@ const SlideGenerator = {
     const newFileName = `MSL_Apresentacao_${municipio}_${uf}_${new Date()
       .toLocaleDateString("pt-BR")
       .replace(/\//g, "-")}`;
+
     const newFile = templateFile.makeCopy(newFileName, outputFolder);
     const newSlide = SlidesApp.openById(newFile.getId());
     const municipioUf = `${municipio}/${uf}`;
@@ -37,9 +38,7 @@ const SlideGenerator = {
     newSlide.saveAndClose();
 
     const pdfBlob = newFile.getAs(MimeType.PDF);
-    const pdfFile = outputFolder
-      .createFile(pdfBlob)
-      .setName(newFileName + ".pdf");
+    const pdfFile = outputFolder.createFile(pdfBlob).setName(newFileName + ".pdf");
     newFile.setTrashed(true);
 
     return pdfFile;

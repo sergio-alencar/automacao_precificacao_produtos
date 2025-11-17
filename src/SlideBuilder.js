@@ -9,9 +9,7 @@ const SlideBuilder = {
    * @param {number} totalSum
    */
   createTableOnSlide(slide, municipio, uf, results, totalSum) {
-    const validResults = results.filter(
-      (r) => r.value !== null && r.value !== undefined
-    );
+    const validResults = results.filter((r) => r.value !== null && r.value !== undefined);
 
     const numRows = validResults.length + 2;
     const numCols = 2;
@@ -45,11 +43,7 @@ const SlideBuilder = {
 
     const title = titleShape.getText();
     title.setText(titleText);
-    title
-      .getTextStyle()
-      .setFontSize(24)
-      .setBold(true)
-      .setForegroundColor(0, 0, 0);
+    title.getTextStyle().setFontSize(24).setBold(true).setForegroundColor(0, 0, 0);
 
     const headerRow = table.getRow(0);
     const headerCell0 = headerRow.getCell(0);
@@ -62,10 +56,7 @@ const SlideBuilder = {
       const style = cell.getText().getTextStyle();
       style.setFontSize(16).setBold(true).setForegroundColor(0, 0, 0);
       cell.getFill().setSolidFill(255, 255, 255);
-      headerCell1
-        .getText()
-        .getParagraphStyle()
-        .setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
+      headerCell1.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
     });
 
     validResults.forEach((result, index) => {
@@ -78,16 +69,8 @@ const SlideBuilder = {
       cell1.getText().setText(Utils.formatCurrency(result.value));
 
       [cell0, cell1].forEach((cell) => {
-        cell
-          .getText()
-          .getTextStyle()
-          .setFontSize(16)
-          .setBold(false)
-          .setForegroundColor(0, 0, 0);
-        cell1
-          .getText()
-          .getParagraphStyle()
-          .setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
+        cell.getText().getTextStyle().setFontSize(16).setBold(false).setForegroundColor(0, 0, 0);
+        cell1.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
       });
     });
 
@@ -100,16 +83,8 @@ const SlideBuilder = {
     totalCell1.getText().setText(Utils.formatCurrency(totalSum));
 
     [totalCell0, totalCell1].forEach((cell) => {
-      cell
-        .getText()
-        .getTextStyle()
-        .setFontSize(16)
-        .setBold(true)
-        .setForegroundColor(0, 0, 0);
-      totalCell1
-        .getText()
-        .getParagraphStyle()
-        .setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
+      cell.getText().getTextStyle().setFontSize(16).setBold(true).setForegroundColor(0, 0, 0);
+      totalCell1.getText().getParagraphStyle().setParagraphAlignment(SlidesApp.ParagraphAlignment.END);
     });
   },
 };

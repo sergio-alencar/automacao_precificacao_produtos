@@ -12,15 +12,20 @@ const SheetHelper = {
   getRowsToProcess(sheet) {
     const activeRange = sheet.getActiveRange();
 
-    if (!activeRange) return [];
+    if (!activeRange) {
+      return [];
+    }
 
     const startRow = activeRange.getRow();
     const numRows = activeRange.getNumRows();
     const endRow = startRow + numRows - 1;
 
     let rowsToProcess = [];
+
     for (let i = startRow; i <= endRow; i++) {
-      if (i > 1) rowsToProcess.push(i);
+      if (i > 1) {
+        rowsToProcess.push(i);
+      }
     }
 
     return [...new Set(rowsToProcess)];
@@ -100,11 +105,7 @@ const SheetHelper = {
       return value;
     }
 
-    const cleanString = String(value)
-      .replace("R$", "")
-      .replace(/\./g, "")
-      .replace(",", ".")
-      .trim();
+    const cleanString = String(value).replace("R$", "").replace(/\./g, "").replace(",", ".").trim();
     const number = parseFloat(cleanString);
 
     return isNaN(number) ? undefined : number;

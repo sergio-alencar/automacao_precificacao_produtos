@@ -47,10 +47,7 @@ const ProductCalculator = {
       return null;
     }
 
-    if (
-      inputs[COLS.CFEM_RECEITA] === undefined ||
-      inputs[COLS.CFEM_RECEITA] === null
-    ) {
+    if (inputs[COLS.CFEM_RECEITA] === undefined || inputs[COLS.CFEM_RECEITA] === null) {
       Logger.log(`CFEM: Skipping. Missing input ("${COLS.CFEM_RECEITA}").`);
       return null;
     }
@@ -69,26 +66,18 @@ const ProductCalculator = {
     const totalArea = inputs[COLS.AREA_RESERVATORIO] || defaultTotalArea;
 
     if (!inputs[COLS.ENERGIA_GERADA] || !inputs[COLS.AREA_INUNDADA]) {
-      Logger.log(
-        `CFURH: Skipping. Missing inputs ("${COLS.ENERGIA_GERADA} or ${COLS.AREA_INUNDADA}").`
-      );
+      Logger.log(`CFURH: Skipping. Missing inputs ("${COLS.ENERGIA_GERADA} or ${COLS.AREA_INUNDADA}").`);
       return null;
     }
 
-    const calculation =
-      inputs[COLS.ENERGIA_GERADA] *
-      tar *
-      (inputs[COLS.AREA_INUNDADA] / totalArea) *
-      margin;
+    const calculation = inputs[COLS.ENERGIA_GERADA] * tar * (inputs[COLS.AREA_INUNDADA] / totalArea) * margin;
 
     return this.applyGlobalFloor(calculation);
   },
 
   comprev(inputs) {
     if (inputs[COLS.REGIME_PREVIDENCIARIO] !== "RPPS") {
-      Logger.log(
-        `COMPREV: Skipping. Municipality regime is not RPPS (found: "${COLS.REGIME_PREVIDENCIARIO}").`
-      );
+      Logger.log(`COMPREV: Skipping. Municipality regime is not RPPS (found: "${COLS.REGIME_PREVIDENCIARIO}").`);
       return null;
     }
 
@@ -109,7 +98,6 @@ const ProductCalculator = {
     }
 
     const calculation = inputs[COLS.RECEITA_ANUAL] * 0.03 * 5 * 1.15;
-
     return this.applyGlobalFloor(calculation);
   },
 
@@ -120,7 +108,6 @@ const ProductCalculator = {
     }
 
     const calculation = inputs[COLS.NUM_ALUNOS] * 32.5 * 1 * 1.15;
-
     return this.applyGlobalFloor(calculation);
   },
 
@@ -131,7 +118,6 @@ const ProductCalculator = {
     }
 
     const calculation = inputs[COLS.NUM_ALUNOS] * 97.5 * 2 * 1.15;
-
     return this.applyGlobalFloor(calculation);
   },
 
@@ -167,9 +153,7 @@ const ProductCalculator = {
     const verbeteIndex = headers.indexOf("VERBETE_711_CREDORAS");
 
     if (ufIndex === -1 || munIndex === -1 || verbeteIndex === -1) {
-      Logger.log(
-        "ISSQN: Skipping. Columns (UF, MUNICIPIO, VERBETE_711_CREDORAS) not found."
-      );
+      Logger.log("ISSQN: Skipping. Columns (UF, MUNICIPIO, VERBETE_711_CREDORAS) not found.");
       return null;
     }
 
@@ -177,9 +161,7 @@ const ProductCalculator = {
     const inputMunNorm = this._normalizeString(inputs[COLS.MUNICIPIO]);
 
     if (!inputUFNorm || !inputMunNorm) {
-      Logger.log(
-        "ISSQN: Skipping. Municipality or UF not found in form input."
-      );
+      Logger.log("ISSQN: Skipping. Municipality or UF not found in form input.");
       return null;
     }
 
@@ -207,7 +189,6 @@ const ProductCalculator = {
     }
 
     const calculation = ((sum * 0.2 * 12 * 0.25 * 0.05) / 12) * 60;
-
     return this.applyGlobalFloor(calculation);
   },
 
@@ -218,7 +199,6 @@ const ProductCalculator = {
     }
 
     const calculation = inputs[COLS.FOLHA_MENSAL] * 60 * 0.01 * 1.15;
-
     return this.applyGlobalFloor(calculation);
   },
 
@@ -229,7 +209,6 @@ const ProductCalculator = {
     }
 
     const calculation = inputs[COLS.POPULACAO] * 180 * 5 * 1.15;
-
     return this.applyGlobalFloor(calculation);
   },
 
@@ -240,15 +219,12 @@ const ProductCalculator = {
     }
 
     const calculation = inputs[COLS.ICMS_ANUAL] * 0.04 * 5 * 1.15;
-
     return this.applyGlobalFloor(calculation);
   },
 
   verbas(inputs) {
     if (!inputs[COLS.NUM_SERVIDORES] || !inputs[COLS.FOLHA_MENSAL]) {
-      Logger.log(
-        `Verbas: Skipping. Missing inputs ("${COLS.NUM_SERVIDORES}" or "${COLS.FOLHA_MENSAL}").`
-      );
+      Logger.log(`Verbas: Skipping. Missing inputs ("${COLS.NUM_SERVIDORES}" or "${COLS.FOLHA_MENSAL}").`);
       return null;
     }
 
@@ -293,10 +269,7 @@ const ProductCalculator = {
     const results = [];
 
     for (const product of productMap) {
-      results.push({
-        name: product.name,
-        value: product.fn(inputs),
-      });
+      results.push({ name: product.name, value: product.fn(inputs) });
     }
 
     return results;

@@ -29,8 +29,7 @@ const EMAIL_BODY = `
                         </tbody>
                     </table>
 
-                <td class="ws-tpl-separator" height="1" width="0"
-                    style="width: 0px; padding: 0.01px; border-right: 1px solid #bdbdbd; height: 1px; font-size: 1pt;">
+                <td class="ws-tpl-separator" height="1" width="0" style="width: 0px; padding: 0.01px; border-right: 1px solid #bdbdbd; height: 1px; font-size: 1pt;">
                     &nbsp;
                 </td>
             </td>
@@ -83,12 +82,11 @@ const EMAIL_BODY = `
                                                                 &nbsp;
                                                             </td>
 
-                                                            <td
-                                                                style="color-scheme: light only; font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
+                                                            <td style="color-scheme: light only; font-family: Arial, Helvetica, sans-serif; font-size: 12px;">
                                                                 <a href="https://wa.me/${SENDER_PHONE_WHATSAPP}" target="_blank" style="text-decoration: none;">
                                                                     <!--[if mso]><p style="margin: 0.1px; line-height: 14px"><![endif]-->
                                                                     <span data-acs="telefone" style="line-height: 1.2; color-scheme: light only; color: #212121; font-family: Arial, Helvetica, sans-serif; white-space: nowrap; font-size: 12px;">
-                                                                    ${SENDER_PHONE}
+                                                                        ${SENDER_PHONE}
                                                                     </span>
                                                                 </a>
                                                             </td>
@@ -207,7 +205,7 @@ const EMAIL_BODY = `
             <tr>
                 <td height="8px" style="line-height: 0; height: 8px;"></td>
             </tr>
-            </tbody>
+        </tbody>
     </table>
 
     <table cellpadding="0" cellspacing="0" border="0" style="max-width: 493px; width: 100%">
@@ -219,10 +217,7 @@ const EMAIL_BODY = `
                             <tr>
                                 <td>
                                     <p style="color: gray; text-align: left; font-size: 10px; margin: 0; line-height: 120%; padding-top: 10px; font-family: Arial, Helvetica, sans-serif;">
-                                        IMPORTANTE: O conteúdo deste e-mail e quaisquer anexos são confidenciais. Eles
-                                        são destinados apenas ao(s) destinatário(s). Se você recebeu este e-mail por
-                                        engano, notifique o remetente imediatamente e não divulgue o conteúdo a ninguém
-                                        ou faça cópias do mesmo.
+                                        IMPORTANTE: O conteúdo deste e-mail e quaisquer anexos são confidenciais. Eles são destinados apenas ao(s) destinatário(s). Se você recebeu este e-mail por engano, notifique o remetente imediatamente e não divulgue o conteúdo a ninguém ou faça cópias do mesmo.
                                     </p>
                                 </td>
                             </tr>
@@ -241,4 +236,4 @@ const EMAIL_BODY = `
         </tbody>
     </table>
     </td>
-    `;
+`;

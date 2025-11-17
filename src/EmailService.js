@@ -10,11 +10,7 @@ const EmailService = {
    */
   sendEmailWithAttachment(recipientEmail, emailCC, municipio, uf, pdfFile) {
     const subject = `MSL - Apresentação de Precificação - ${municipio}/${uf}`;
-    const body = EMAIL_BODY.replace("{{MUNICIPIO}}", municipio).replace(
-      "{{UF}}",
-      uf
-    );
-
+    const body = EMAIL_BODY.replace("{{MUNICIPIO}}", municipio).replace("{{UF}}", uf);
     const to = recipientEmail.replace(/;/g, ",");
     const cc = emailCC ? emailCC.replace(/;/g, ",") : null;
 

@@ -17,13 +17,10 @@ function getEstbanData() {
     }
 
     const lastRow = sheet.getLastRow();
-
     const ufData = sheet.getRange("B2:B" + lastRow).getValues();
     const munData = sheet.getRange("D2:D" + lastRow).getValues();
     const verbeteData = sheet.getRange("H2:H" + lastRow).getValues();
-
     const newData = [];
-
     newData.push(["UF", "MUNICIPIO", "VERBETE_711_CREDORAS"]);
 
     for (let i = 1; i < ufData.length; i++) {
