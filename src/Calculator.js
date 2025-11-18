@@ -47,14 +47,18 @@ const ProductCalculator = {
       return null;
     }
 
-    if (inputs[COLS.CFEM_RECEITA] === undefined || inputs[COLS.CFEM_RECEITA] === null) {
-      Logger.log(`CFEM: Skipping. Missing input ("${COLS.CFEM_RECEITA}").`);
-      return null;
+    const floor = 2500000;
+
+    if (
+      inputs[COLS.CFEM_RECEITA] === undefined ||
+      inputs[COLS.CFEM_RECEITA] === null ||
+      inputs[COLS.CFEM_RECEITA] === ""
+    ) {
+      Logger.log(`CFEM: Input missing ("${COLS.CFEM_RECEITA}"). Applying default floor value.`);
+      return floor;
     }
 
-    const floor = 2500000;
     const calculation = inputs[COLS.CFEM_RECEITA] * 5 * 0.15;
-
     return Math.max(calculation, floor);
   },
 
