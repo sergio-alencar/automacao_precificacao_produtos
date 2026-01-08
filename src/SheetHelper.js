@@ -71,13 +71,7 @@ const SheetHelper = {
         COLS.RECEITA_ANUAL,
         COLS.FOLHA_MENSAL,
         COLS.NUM_SERVIDORES,
-        COLS.NUM_ALUNOS,
-        COLS.ICMS_ANUAL,
         COLS.CFEM_RECEITA,
-        COLS.ENERGIA_GERADA,
-        COLS.AREA_INUNDADA,
-        COLS.TAR,
-        COLS.AREA_RESERVATORIO,
       ];
 
       if (numericHeaders.includes(header)) {
@@ -105,7 +99,11 @@ const SheetHelper = {
       return value;
     }
 
-    const cleanString = String(value).replace("R$", "").replace(/\./g, "").replace(",", ".").trim();
+    const cleanString = String(value)
+      .replace("R$", "")
+      .replace(/\./g, "")
+      .replace(",", ".")
+      .trim();
     const number = parseFloat(cleanString);
 
     return isNaN(number) ? undefined : number;

@@ -54,45 +54,14 @@ const ProductCalculator = {
       inputs[COLS.CFEM_RECEITA] === null ||
       inputs[COLS.CFEM_RECEITA] === ""
     ) {
-      Logger.log(`CFEM: Input missing ("${COLS.CFEM_RECEITA}"). Applying default floor value.`);
+      Logger.log(
+        `CFEM: Input missing ("${COLS.CFEM_RECEITA}"). Applying default floor value.`
+      );
       return floor;
     }
 
     const calculation = inputs[COLS.CFEM_RECEITA] * 5 * 0.15;
     return Math.max(calculation, floor);
-  },
-
-  cfurh(inputs) {
-    const defaultTar = 79.62;
-    const defaultTotalArea = 250;
-    const margin = 1.2;
-    const tar = inputs[COLS.TAR] || defaultTar;
-    const totalArea = inputs[COLS.AREA_RESERVATORIO] || defaultTotalArea;
-
-    if (!inputs[COLS.ENERGIA_GERADA] || !inputs[COLS.AREA_INUNDADA]) {
-      Logger.log(`CFURH: Skipping. Missing inputs ("${COLS.ENERGIA_GERADA} or ${COLS.AREA_INUNDADA}").`);
-      return null;
-    }
-
-    const calculation = inputs[COLS.ENERGIA_GERADA] * tar * (inputs[COLS.AREA_INUNDADA] / totalArea) * margin;
-
-    return this.applyGlobalFloor(calculation);
-  },
-
-  comprev(inputs) {
-    if (inputs[COLS.REGIME_PREVIDENCIARIO] !== "RPPS") {
-      Logger.log(`COMPREV: Skipping. Municipality regime is not RPPS (found: "${COLS.REGIME_PREVIDENCIARIO}").`);
-      return null;
-    }
-
-    if (!inputs[COLS.POPULACAO]) {
-      Logger.log(`COMPREV: Skipping. Missing input ("${COLS.POPULACAO}").`);
-      return null;
-    }
-
-    const calculation = inputs[COLS.POPULACAO] * 0.055 * 2500 * 1.2;
-
-    return this.applyGlobalFloor(calculation);
   },
 
   fpm(inputs) {
@@ -102,26 +71,6 @@ const ProductCalculator = {
     }
 
     const calculation = inputs[COLS.RECEITA_ANUAL] * 0.03 * 5 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
-
-  fundeb_vaar(inputs) {
-    if (!inputs[COLS.NUM_ALUNOS]) {
-      Logger.log(`VAAR: Skipping. Missing input ("${COLS.NUM_ALUNOS}").`);
-      return null;
-    }
-
-    const calculation = inputs[COLS.NUM_ALUNOS] * 32.5 * 1 * 1.15;
-    return this.applyGlobalFloor(calculation);
-  },
-
-  fundeb_vaat(inputs) {
-    if (!inputs[COLS.NUM_ALUNOS]) {
-      Logger.log(`VAAT: Skipping. Missing input ("${COLS.NUM_ALUNOS}").`);
-      return null;
-    }
-
-    const calculation = inputs[COLS.NUM_ALUNOS] * 97.5 * 2 * 1.15;
     return this.applyGlobalFloor(calculation);
   },
 
@@ -157,7 +106,9 @@ const ProductCalculator = {
     const verbeteIndex = headers.indexOf("VERBETE_711_CREDORAS");
 
     if (ufIndex === -1 || munIndex === -1 || verbeteIndex === -1) {
-      Logger.log("ISSQN: Skipping. Columns (UF, MUNICIPIO, VERBETE_711_CREDORAS) not found.");
+      Logger.log(
+        "ISSQN: Skipping. Columns (UF, MUNICIPIO, VERBETE_711_CREDORAS) not found."
+      );
       return null;
     }
 
@@ -165,7 +116,9 @@ const ProductCalculator = {
     const inputMunNorm = this._normalizeString(inputs[COLS.MUNICIPIO]);
 
     if (!inputUFNorm || !inputMunNorm) {
-      Logger.log("ISSQN: Skipping. Municipality or UF not found in form input.");
+      Logger.log(
+        "ISSQN: Skipping. Municipality or UF not found in form input."
+      );
       return null;
     }
 
@@ -228,7 +181,9 @@ const ProductCalculator = {
 
   verbas(inputs) {
     if (!inputs[COLS.NUM_SERVIDORES] || !inputs[COLS.FOLHA_MENSAL]) {
-      Logger.log(`Verbas: Skipping. Missing inputs ("${COLS.NUM_SERVIDORES}" or "${COLS.FOLHA_MENSAL}").`);
+      Logger.log(
+        `Verbas: Skipping. Missing inputs ("${COLS.NUM_SERVIDORES}" or "${COLS.FOLHA_MENSAL}").`
+      );
       return null;
     }
 
@@ -257,11 +212,7 @@ const ProductCalculator = {
   calculateAllProducts(inputs) {
     const productMap = [
       { name: "CFEM", fn: this.cfem.bind(this) },
-      { name: "CFURH", fn: this.cfurh.bind(this) },
-      { name: "COMPREV", fn: this.comprev.bind(this) },
       { name: "FPM", fn: this.fpm.bind(this) },
-      { name: "FUNDEB VAAR", fn: this.fundeb_vaar.bind(this) },
-      { name: "FUNDEB VAAT", fn: this.fundeb_vaat.bind(this) },
       { name: "IRRF", fn: this.irrf.bind(this) },
       { name: "ISSQN", fn: this.issqn.bind(this) },
       { name: "RAT/FAP", fn: this.rat_fap.bind(this) },
