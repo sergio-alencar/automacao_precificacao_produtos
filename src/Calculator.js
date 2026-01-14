@@ -2,13 +2,14 @@
 
 const ProductCalculator = {
   GLOBAL_FLOOR: 500000,
+  ISSQN_FLOOR: 1500000,
 
-  applyGlobalFloor(value) {
+  applyGlobalFloor(value, limit = this.GLOBAL_FLOOR) {
     if (value === null || value === undefined) {
       return null;
     }
 
-    return Math.max(value, this.GLOBAL_FLOOR);
+    return Math.max(value, limit);
   },
 
   /**
@@ -142,7 +143,7 @@ const ProductCalculator = {
       Logger.log(
         `ISSQN: No value found for ${inputMunNorm}/${inputUFNorm} on ESTBAN sheet. Applying default floor value.`
       );
-      return this.applyGlobalFloor(0);
+      return this.applyGlobalFloor(0, this.ISSQN_FLOOR);
     }
 
     const calculation = ((sum * 0.2 * 12 * 0.25 * 0.05) / 12) * 60;
