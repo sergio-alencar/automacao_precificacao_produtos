@@ -147,7 +147,7 @@ const ProductCalculator = {
     }
 
     const calculation = ((sum * 0.2 * 12 * 0.25 * 0.05) / 12) * 60;
-    return this.applyGlobalFloor(calculation);
+    return this.applyGlobalFloor(calculation, this.ISSQN_FLOOR);
   },
 
   rat_fap(inputs) {
