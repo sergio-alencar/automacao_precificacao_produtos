@@ -1,0 +1,24 @@
+// src/emailService.ts
+
+class EmailService {
+  static sendEmailWithAttachment(
+    recipientEmail: string,
+    emailCC: string | null | undefined,
+    municipio: string,
+    uf: string,
+    pdfFile: GoogleAppsScript.Drive.File,
+  ): void {
+    const subject = `MSL - Apresentação de Precificação - ${municipio}/${uf}`;
+    const htmlBody = getEmailHtml(municipio, uf);
+    const to = recipientEmail.replace(/;/g, ",").trim();
+    const cc = emailCC ? emailCC.replace(/;/g, ",").trim() : undefined;
+
+    MailApp.sendEmail({
+      to: to,
+      cc: cc,
+      subject: subject,
+      htmlBody: htmlBody,
+      attachments: [pdfFile.getAs(MimeType.PDF)],
+    });
+  }
+}
