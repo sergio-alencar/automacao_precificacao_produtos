@@ -6,6 +6,7 @@ const CONFIG = {
   OUTPUT_FOLDER_ID: "1edKkvPT0XXP-SrRHXw_tRATdnUamXBCR",
   SHEET_NAME: "Respostas ao formulário 1",
   ADMIN_EMAIL: "gabriela.leao@msladvocacia.com.br",
+  FIXED_CC_EMAIL: "ativacoes@msladvocacia.com.br",
 } as const;
 
 const COLS = {
