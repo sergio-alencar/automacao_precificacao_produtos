@@ -1,4 +1,4 @@
-// src/emailBody.ts
+// src\mail\emailBody.ts
 
 const SENDER = {
   NAME: "Gabriela Leão",

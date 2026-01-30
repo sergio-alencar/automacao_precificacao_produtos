@@ -7,6 +7,7 @@ class SheetHelper {
     COLS.FOLHA_MENSAL,
     COLS.NUM_SERVIDORES,
     COLS.CFEM_RECEITA,
+    COLS.CONTA_LUZ,
   ];
 
   static getRowsToProcess(sheet: GoogleAppsScript.Spreadsheet.Sheet): number[] {
@@ -28,7 +29,10 @@ class SheetHelper {
   }
 
   static getHeaders(sheet: GoogleAppsScript.Spreadsheet.Sheet): string[] {
-    return sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0];
+    return sheet
+      .getRange(1, 1, 1, sheet.getLastColumn())
+      .getValues()[0]
+      .map((header) => String(header).trim());
   }
 
   static getColumnIndex(headers: string[], columnName: string): number {

@@ -20,6 +20,7 @@ const COLS = {
   NUM_SERVIDORES: "Número de servidores",
   ICMS_ANUAL: "ICMS anual",
   CFEM_RECEITA: "CFEM arrecadado nos últimos 5 anos (R$)",
+  CONTA_LUZ: "Conta de luz do município (R$)",
   STATUS: "Status",
   DESIRED_PRODUCTS: "Produtos que quero incluir na proposta:",
   IS_AJF: "Modelo AJF?",

@@ -1,4 +1,4 @@
-// src/emailService.ts
+// src\mail\emailService.ts
 
 class EmailService {
   static sendEmailWithAttachment(
