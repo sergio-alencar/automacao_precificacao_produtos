@@ -7,3 +7,6 @@ node_modules/
 *.gdoc
 *.gslides
 *.gdraw
+apresentacoes_geradas/
+docs/
+templates/
