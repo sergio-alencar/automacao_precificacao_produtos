@@ -10,3 +10,6 @@ node_modules/
 apresentacoes_geradas/
 docs/
 templates/
+dist/
+*.js
+!*.config.js
