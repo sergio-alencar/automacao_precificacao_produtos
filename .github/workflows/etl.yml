@@ -28,9 +28,12 @@ jobs:
 
       - name: Injecting secrets (credentials.json and .env)
         working-directory: ./data_pipeline
+        env:
+          GCP_CREDS: ${{ secrets.GCP_CREDENTIALS }}
+          ENV_DATA: ${{ secrets.ENV_FILE }}
         run: |
-          echo "${{ secrets.GCP_CREDENTIALS }}" > credentials.json
-          echo "${{ secrets.ENV_FILE }}" > .env
+          echo "$GCP_CREDS" > credentials.json
+          echo "$ENV_DATA" > .env
 
       - name: Running ETL Pipeline
         working-directory: ./data_pipeline
