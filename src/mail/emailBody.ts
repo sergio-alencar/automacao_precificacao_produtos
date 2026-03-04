@@ -1,19 +1,8 @@
 // src\mail\emailBody.ts
 
-const SENDER = {
-  NAME: "Gabriela Leão",
-  POSITION: "Assistente Comercial",
-  EMAIL: "gabriela.leao@msladvocacia.com.br",
-  PHONE_DISPLAY: "(31) 99840-6545",
-  PHONE_WHATSAPP: "5531998406545",
-  SITE_DISPLAY: "www.msladvocacia.com.br",
-  URL_SITE: "https://www.msladvocacia.com.br/",
-  URL_LINKEDIN: "https://www.linkedin.com/company/msladv",
-  URL_INSTAGRAM: "https://www.instagram.com/msl_adv/",
-  URL_TWITTER: "https://twitter.com/msl_adv",
-} as const;
-
 function getEmailHtml(municipio: string, uf: string): string {
+  const SENDER = ENV.SENDER;
+
   return `
     Olá,
     <br>

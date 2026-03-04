@@ -12,7 +12,9 @@ class SheetHelper {
 
   static getRowsToProcess(sheet: GoogleAppsScript.Spreadsheet.Sheet): number[] {
     const activeRange = sheet.getActiveRange();
-    if (!activeRange) return [];
+    if (!activeRange) {
+      return [];
+    }
 
     const startRow = activeRange.getRow();
     const numRows = activeRange.getNumRows();
@@ -68,8 +70,13 @@ class SheetHelper {
   }
 
   private static parseNumber(value: any): number | undefined {
-    if (value === null || value === undefined || value === "") return undefined;
-    if (typeof value === "number") return value;
+    if (value === null || value === undefined || value === "") {
+      return undefined;
+    }
+
+    if (typeof value === "number") {
+      return value;
+    }
 
     const cleanString = String(value)
       .replace("R$", "")
@@ -82,7 +89,9 @@ class SheetHelper {
   }
 
   private static parseString(value: any): string {
-    if (value === null || value === undefined) return "";
+    if (value === null || value === undefined) {
+      return "";
+    }
 
     let strValue = String(value).trim();
     const regex = /^munic[ií]pio de /i;

@@ -2,6 +2,12 @@
 build/
 node_modules/
 *.log
+credentials.json
+.env
+_env.ts
+venv/
+.venv/
+*.csv
 *.gform
 *.gsheet
 *.gdoc

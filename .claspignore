@@ -1,0 +1,6 @@
+**/*.test.*
+**/*.example.*
+tests/
+jest.config.js
+data_pipeline/
+node_modules/

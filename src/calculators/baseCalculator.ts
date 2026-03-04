@@ -25,7 +25,9 @@ abstract class BaseCalculator {
   }
 
   protected normalizeString(str: string): string {
-    if (!str) return "";
+    if (!str) {
+      return "";
+    }
 
     return str
       .toString()

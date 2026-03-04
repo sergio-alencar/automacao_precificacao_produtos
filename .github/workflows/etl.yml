@@ -1,0 +1,37 @@
+name: ESTBAN Monthly ETL
+
+on:
+  schedule:
+    - cron: "0 8 5 * *"
+
+  workflow_dispatch:
+
+jobs:
+  run-data-pipeline:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Downloading code from repository
+        uses: actions/checkout@v4
+
+      - name: Configuring Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: "pip"
+
+      - name: Installing libraries (requirements)
+        working-directory: ./data_pipeline
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Injecting secrets (credentials.json and .env)
+        working-directory: ./data_pipeline
+        run: |
+          echo "${{ secrets.GCP_CREDENTIALS }}" > credentials.json
+          echo "${{ secrets.ENV_FILE }}" > .env
+
+      - name: Running ETL Pipeline
+        working-directory: ./data_pipeline
+        run: python main.py

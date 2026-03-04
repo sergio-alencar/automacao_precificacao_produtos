@@ -3,6 +3,11 @@
   "version": "1.0.0",
   "main": "index.js",
   "scripts": {
+    "prebuild": "if exist build rmdir /s /q build",
+    "build": "tsc",
+    "postbuild": "copy src\\appsscript.json build\\",
+    "push": "clasp push -f",
+    "deploy": "npm run build && npm run push",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
