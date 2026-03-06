@@ -19,3 +19,5 @@ templates/
 dist/
 *.js
 !*.config.js
+__pycache__/
+.pytest_cache/

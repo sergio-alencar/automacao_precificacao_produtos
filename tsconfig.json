@@ -8,8 +8,8 @@
     "noImplicitAny": false,
     "esModuleInterop": true,
     "types": ["google-apps-script"],
-    "rootDir": "./src",
+    "rootDir": "./apps_script",
     "outDir": "./build"
   },
-  "include": ["./src/**/*"]
+  "include": ["./apps_script/**/*"]
 }
