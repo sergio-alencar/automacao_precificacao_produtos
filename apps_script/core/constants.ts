@@ -1,7 +1,9 @@
 // apps_script\core\constants.ts
 
 class AppConstants {
-  static readonly CONFIG = ENV.CONFIG;
+  static get CONFIG() {
+    return getEnv().CONFIG;
+  }
 
   static readonly SLIDES = {
     RESULTS_PAGE_INDEX: 1,

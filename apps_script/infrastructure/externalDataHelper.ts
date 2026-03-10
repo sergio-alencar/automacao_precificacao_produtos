@@ -11,12 +11,14 @@ class ExternalDataHelper {
     console.log("Fetching processed ESTBAN data from Google Sheets API...");
 
     try {
-      const spreadsheet = SpreadsheetApp.openById(ENV.ESTBAN_FILE_ID);
-      const sheet = spreadsheet.getSheetByName(ENV.ESTBAN_SHEET_NAME);
+      const env = getEnv();
+
+      const spreadsheet = SpreadsheetApp.openById(env.ESTBAN_FILE_ID);
+      const sheet = spreadsheet.getSheetByName(env.ESTBAN_SHEET_NAME);
 
       if (!sheet) {
         throw new Error(
-          `Sheet "${ENV.ESTBAN_SHEET_NAME}" not found. Did the Python ETL run?`,
+          `Sheet "${env.ESTBAN_SHEET_NAME}" not found. Did the Python ETL run?`,
         );
       }
 
