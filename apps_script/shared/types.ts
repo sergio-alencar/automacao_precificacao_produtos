@@ -9,7 +9,6 @@ interface CalculationInput {
   numServidores?: number;
   icmsAnual?: number;
   cfemReceita?: number;
-  contaLuz?: number;
   isAjf?: boolean;
 }
 

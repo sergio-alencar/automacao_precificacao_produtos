@@ -27,7 +27,6 @@ class CalculatorFactory {
       numServidores: rawInputs[COLUMNS.NUM_EMPLOYEES],
       icmsAnual: rawInputs[COLUMNS.ANNUAL_ICMS],
       cfemReceita: rawInputs[COLUMNS.CFEM_REVENUE],
-      contaLuz: rawInputs[COLUMNS.ELECTRICITY_BILL],
     };
 
     return this.getCalculators().map((calc) => {

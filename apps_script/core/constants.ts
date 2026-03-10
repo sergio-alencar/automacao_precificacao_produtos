@@ -20,7 +20,6 @@ class AppConstants {
     NUM_EMPLOYEES: "Número de servidores",
     ANNUAL_ICMS: "ICMS anual",
     CFEM_REVENUE: "CFEM arrecadado nos últimos 5 anos (R$)",
-    ELECTRICITY_BILL: "Conta de luz do município (R$)",
     STATUS: "Status",
     DESIRED_PRODUCTS: "Produtos que quero incluir na proposta:",
     IS_AJF: "Modelo AJF?",

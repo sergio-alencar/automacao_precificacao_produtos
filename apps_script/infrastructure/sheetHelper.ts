@@ -7,7 +7,6 @@ class SheetHelper {
     AppConstants.COLUMNS.MONTHLY_PAYROLL,
     AppConstants.COLUMNS.NUM_EMPLOYEES,
     AppConstants.COLUMNS.CFEM_REVENUE,
-    AppConstants.COLUMNS.ELECTRICITY_BILL,
     AppConstants.COLUMNS.ANNUAL_ICMS,
   ];
 

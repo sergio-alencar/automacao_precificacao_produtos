@@ -20,7 +20,6 @@ function debugCalculator() {
       numServidores: 0,
       icmsAnual: 0,
       cfemReceita: 0,
-      contaLuz: 0,
       isAjf: false,
     };
 

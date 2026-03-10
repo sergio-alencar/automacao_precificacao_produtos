@@ -1,16 +1,5 @@
 // apps_script\calculators\reEnergiaCalculator.ts
 
-/**
- * Calculadora: Re-Energia
- *
- * Objetivo: Estimar o Potencial de Recuperação Econômica (Crédito Estimado + Margem Técnica) para o município.
- *
- * Lógica de Definição da Conta Mensal:
- * 1. Prioridade: Usa o valor real informado no campo "Conta de luz do município" (`contaLuz`).
- * 2. Estimativa: Se o valor real não for informado, estima a conta baseada na `populacao`
- * utilizando a Tabela de Referência (faixas populacionais).
- */
-
 class ReEnergiaCalculator extends BaseCalculator {
   readonly name = "Re-Energia";
 
@@ -34,19 +23,14 @@ class ReEnergiaCalculator extends BaseCalculator {
   private readonly DEFAULT_MINIMUM_BILL = 52_500;
 
   calculate(inputs: CalculationInput): number | null {
-    let monthlyBill = inputs.contaLuz;
-
-    if (!monthlyBill && inputs.populacao) {
-      monthlyBill = this.getEstimatedBill(inputs.populacao);
-    }
-
-    if (!monthlyBill) {
+    if (!inputs.populacao) {
       console.warn(
-        `Re-Energia: Missing both electricity bill and population for ${inputs.municipio}/${inputs.uf}. Skipping calculation.`,
+        `Re-energia: Population not informed for ${inputs.municipio}/${inputs.municipio}. Skipping calculation.`,
       );
       return null;
     }
 
+    const monthlyBill = this.getEstimatedBill(inputs.populacao);
     const tenYearBase = monthlyBill * this.RECOVERABLE_MONTHS;
     const estimatedCredit = tenYearBase * this.AVERAGE_RECOVERY_RATE;
     const creditWithMargin = estimatedCredit * (1 + this.TECHNICAL_MARGIN);
